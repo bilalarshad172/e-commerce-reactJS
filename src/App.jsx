@@ -21,7 +21,7 @@ function App() {
           }
         />
         <Route
-          path="/products/:productId"
+          path="/products/:id"
           element={
             <ProtectedRoute>
               <ProductView />

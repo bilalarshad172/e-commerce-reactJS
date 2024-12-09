@@ -18,9 +18,30 @@ export const fetchProducts = createAsyncThunk(
   }
 );
 
+export const fetchProductById = createAsyncThunk(
+  "products/fetchProductById",
+  async (id, { rejectWithValue }) => {
+    try {
+      console.log("Product ID:", id); // Debug the ID
+      if (!id) throw new Error("Invalid product ID");
+
+      const response = await fetch(`https://fakestoreapi.com/products/${id}`);
+      if (!response.ok) throw new Error("Failed to fetch product");
+
+      const data = await response.json();
+      return data;
+    } catch (error) {
+      console.error("Error in fetchProductById thunk:", error.message);
+      return rejectWithValue(error.message);
+    }
+  }
+);
+
+
 // Initial state
 const initialState = {
   products: [],
+  selectedProduct: null,
   loading: false,
   error: null,
 };
@@ -29,9 +50,14 @@ const initialState = {
 const productSlice = createSlice({
   name: "products",
   initialState,
-  reducers: {},
+  reducers: {
+    clearSelectedProduct: (state) => {
+      state.selectedProduct = null; // Clear selected product when needed
+    },
+  },
   extraReducers: (builder) => {
     builder
+      // fetch all products
       .addCase(fetchProducts.pending, (state) => {
         state.loading = true;
         state.error = null;
@@ -43,8 +69,24 @@ const productSlice = createSlice({
       .addCase(fetchProducts.rejected, (state, action) => {
         state.loading = false;
         state.error = action.payload;
+      })
+    
+     // Fetch single product by ID
+      .addCase(fetchProductById.pending, (state) => {
+        state.loading = true;
+        state.error = null;
+      })
+      .addCase(fetchProductById.fulfilled, (state, action) => {
+        state.loading = false;
+        state.selectedProduct = action.payload;
+      })
+      .addCase(fetchProductById.rejected, (state, action) => {
+        state.loading = false;
+        state.error = action.payload;
       });
   },
 });
 
+
+export const { clearSelectedProduct } = productSlice.actions;
 export default productSlice.reducer;
