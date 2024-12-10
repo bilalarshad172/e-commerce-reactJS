@@ -2,6 +2,7 @@ import React, { useEffect, useState } from "react";
 import Header from "../../components/Header";
 import { useDispatch, useSelector } from "react-redux";
 import { useParams } from "react-router-dom";
+import Footer from "../../components/Footer";
 import {
   fetchProductById,
   clearSelectedProduct,
@@ -90,6 +91,7 @@ const ProductView = () => {
 
         
       </div>
+      <Footer />
     </>
   );
 };
