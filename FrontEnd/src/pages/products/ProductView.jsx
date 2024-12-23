@@ -40,7 +40,7 @@ const ProductView = () => {
     <>
       <Header />
       <div className=" gap-20 mt-10 mx-20 ">
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-42items-center">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-42 items-center">
           {/* Image Container */}
           <div className="">
             <div className="w-full max-w-lg h-96  flex items-center justify-center overflow-hidden">
