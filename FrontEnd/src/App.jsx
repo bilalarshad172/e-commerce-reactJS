@@ -5,12 +5,14 @@ import Signup from "./pages/signup/Signup";
 import ProductListing from "./pages/products/ProductsListing";
 import ProductView from "./pages/products/ProductView";
 import ProtectedRoute from "./utils/ProtectedRoute";
+import AdminLogin from "./pages/admin/AdminLogin";
 
 function App() {
   return (
     <BrowserRouter>
       <Routes>
         <Route path="/" element={<Login />} />
+        <Route path="/admin101" element={<AdminLogin />} />
         <Route path="/signup" element={<Signup />} />
         <Route
           path="/products"
