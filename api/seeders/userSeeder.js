@@ -2,30 +2,28 @@ import User from "../models/user.model.js";
 import bcrypt from "bcryptjs";
 
 const adminUser = {
-  username: 'Admin User',
-  email: 'admin@example.com',
-  password: 'admin123', // Plain text password, will hash this before saving
-  role: 'admin', // Add role field if required
+  username: "Admin User",
+  email: "admin@admin.com",
+  password: "admin123", // Plain text password, will hash this before saving
+  role: "admin", // Admin role
 };
 
 const seedAdminUser = async () => {
   try {
-    // Check if the admin user already exists
-    const existingUser = await User.findOne({ email: adminUser.email });
-    if (existingUser) {
-      console.log('Admin user already exists. Skipping seeding.');
-      return;
-    }
+    // Delete all existing users with the role 'admin'
+    await User.deleteMany({ role: "admin" });
+    console.log("All previous admin users have been deleted.");
 
     // Hash the password
     const hashedPassword = await bcrypt.hash(adminUser.password, 10);
-    adminUser.password = hashedPassword;
 
-    // Save the admin user to the database
-    await User.create(adminUser);
-    console.log('Admin user seeded successfully.');
+    // Create a new admin user
+    const newAdminUser = { ...adminUser, password: hashedPassword };
+    await User.create(newAdminUser);
+
+    console.log("New admin user created successfully.");
   } catch (error) {
-    console.error('Error seeding admin user:', error.message);
+    console.error("Error seeding admin user:", error.message);
   }
 };
 

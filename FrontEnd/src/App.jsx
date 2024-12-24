@@ -6,6 +6,7 @@ import ProductListing from "./pages/products/ProductsListing";
 import ProductView from "./pages/products/ProductView";
 import ProtectedRoute from "./utils/ProtectedRoute";
 import AdminLogin from "./pages/admin/AdminLogin";
+import AdminDashbaord from "./pages/admin/dashboard/AdminDashboard";
 
 function App() {
   return (
@@ -13,6 +14,7 @@ function App() {
       <Routes>
         <Route path="/" element={<Login />} />
         <Route path="/admin101" element={<AdminLogin />} />
+        <Route path="/admin/dashboard" element={<AdminDashbaord />} />
         <Route path="/signup" element={<Signup />} />
         <Route
           path="/products"
