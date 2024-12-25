@@ -1,12 +1,10 @@
 import React from "react";
-import Header from "../../../components/Header";
 
 const Sidebar = () => {
   return (
     <>
-      <Header />
-      <div className="grid grid-cols-4">
-        <div className="col-span-1 border-r h-screen shadow-md">
+      <div className="">
+        <div className=" border-r h-screen shadow-md">
           <ul>
             <li className="p-4 border-b">Dashboard</li>
             <li className="p-4 border-b">Products</li>
