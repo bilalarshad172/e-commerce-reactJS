@@ -5,6 +5,8 @@ import {
   FileTextOutlined,
   UserOutlined,
   SettingOutlined,
+   AppstoreOutlined,
+  TagsOutlined,
 } from "@ant-design/icons";
 import { NavLink } from "react-router-dom";
 
@@ -35,6 +37,32 @@ const Sidebar = () => {
         >
           <ShoppingCartOutlined />
           <span>Products</span>
+        </NavLink>
+      </li>
+      <li className="p-4 border-b flex items-center gap-2">
+        <NavLink
+          to="/admin/categories"
+          className={({ isActive }) =>
+            isActive
+              ? "text-teal-500 border-l-4 border-teal-500 pl-2 flex items-center gap-2"
+              : "text-gray-700 pl-2 flex items-center gap-2"
+          }
+        >
+          <AppstoreOutlined />
+          <span>Categories</span>
+        </NavLink>
+      </li>
+      <li className="p-4 border-b flex items-center gap-2">
+        <NavLink
+          to="/admin/brands"
+          className={({ isActive }) =>
+            isActive
+              ? "text-yellow-500 border-l-4 border-yellow-500 pl-2 flex items-center gap-2"
+              : "text-gray-700 pl-2 flex items-center gap-2"
+          }
+        >
+          <TagsOutlined />
+          <span>Brands</span>
         </NavLink>
       </li>
       <li className="p-4 border-b flex items-center gap-2">
