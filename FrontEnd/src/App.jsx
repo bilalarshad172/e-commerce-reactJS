@@ -12,8 +12,10 @@ import Orders from "./pages/admin/sidebar/order/Orders";
 import Users from "./pages/admin/sidebar/users/Users";
 import Settings from "./pages/admin/sidebar/settings/Settings";
 import Dashboard from "./pages/admin/dashboard/Dashboard";
-import AddCategories from "./pages/admin/sidebar/categories/AddCategories";
+import Categories from "./pages/admin/sidebar/categories/Categories";
 import AddBrands from "./pages/admin/sidebar/brands/AddBrands";
+import AddCategories from "./pages/admin/sidebar/categories/AddCategories";
+import Brands from "./pages/admin/sidebar/brands/Brands";
 
 function App() {
   return (
@@ -29,8 +31,10 @@ function App() {
           <Route index element={<Navigate to="/admin/dashboard" />} />
           <Route path="dashboard" element={<Dashboard/>} />
           <Route path="products" element={<AddProduct />} />
-          <Route path="categories" element={<AddCategories />} />
-          <Route path="brands" element={<AddBrands />} />
+          <Route path="categories" element={<Categories />} />
+          <Route path="categories/add" element={<AddCategories />} />
+          <Route path="brands/add" element={<AddBrands />} />
+          <Route path="brands" element={<Brands />} />
           <Route path="content" element={<ContentManagement />} />
           <Route path="orders" element={<Orders />} />
           <Route path="users" element={<Users />} />

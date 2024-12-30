@@ -1,98 +1,86 @@
-import React from "react";
-import { Table, Button, Space } from "antd";
-import { EditOutlined, DeleteOutlined } from "@ant-design/icons";
+import React, { useState } from "react";
+import { TreeSelect } from "antd";
 
-const columns = [
+const treeData = [
   {
-    title: "Name",
-    dataIndex: "name",
-    key: "name",
-  },
-  {
-    title: "Actions",
-    key: "actions",
-    dataIndex: "key", // Use `key` to uniquely identify rows
-    align: "right",
-    render: (text, record) => (
-      <Space>
-        <Button
-          type="text"
-          icon={<EditOutlined style={{ color: "#1890ff" }} />}
-          onClick={() => handleEdit(record.key)}
-        />
-        <Button
-          type="text"
-          icon={<DeleteOutlined style={{ color: "red" }} />}
-          onClick={() => handleDelete(record.key)}
-        />
-      </Space>
-    ),
-  },
-];
-
-const handleEdit = (id) => {
-  console.log("Edit category with ID:", id);
-};
-
-const handleDelete = (id) => {
-  console.log("Delete category with ID:", id);
-};
-
-const data = [
-  {
-    key: "1",
-    name: "Summer Collection",
+    value: "parent 1",
+    title: "parent 1",
     children: [
       {
-        key: "2",
-        name: "Shirt",
+        value: "parent 1-0",
+        title: "parent 1-0",
+        children: [
+          {
+            value: "leaf1",
+            title: "my leaf",
+          },
+          {
+            value: "leaf2",
+            title: "your leaf",
+          },
+        ],
       },
       {
-        key: "3",
-        name: "Trousers",
-      },
-    ],
-  },
-  {
-    key: "4",
-    name: "Winter Collection",
-    children: [
-      {
-        key: "5",
-        name: "Jacket",
-      },
-      {
-        key: "6",
-        name: "Sweater",
+        value: "parent 1-1",
+        title: "parent 1-1",
+        children: [
+          {
+            value: "sss",
+            title: (
+              <b
+                style={{
+                  color: "#08c",
+                }}
+              >
+                sss
+              </b>
+            ),
+          },
+        ],
       },
     ],
   },
 ];
 
 const AddCategories = () => {
+  const [value, setValue] = useState();
+  const onChange = (newValue) => {
+    console.log(newValue);
+    setValue(newValue);
+  };
   return (
     <div className="border rounded-md shadow-md mt-5">
-      <div className="flex justify-between items-center mx-5">
-        <div className=" mt-2 text-xl font-semibold">Categories</div>
-        <div>
-          <button className="border rounded-md px-2 py-1 mt-2 border-black text-black hover:bg-black hover:text-white">
-            Add Categories
-          </button>
-        </div>
+      <div className="flex items-center justify-between mx-5">
+        <h3 className=" mt-2 text-xl font-semibold">Add Categories</h3>{" "}
+        <button className="border rounded-md px-2 py-1 mt-3 border-black text-black hover:bg-black hover:text-white">
+          Save
+        </button>
       </div>
-
-          <div className="mt-5">
-          <Table
-        columns={columns}
-        dataSource={data}
-        pagination={false}
-        expandable={{
-          expandRowByClick: true, // Allows row expansion when clicking anywhere on the row
-          rowExpandable: (record) => !!record.children, // Only expandable if there are children
-        }}
-        bordered
-      />
-          </div>
+      <div className="flex flex-col mt-3">
+        <label className="mx-5 font-semibold">Category Name</label>
+        <input type="text" className="border rounded mx-5 p-1" id="cat_name" />
+      </div>
+      <div className="flex flex-col mb-5">
+        <label className="mx-5 font-semibold">Parent Category Name</label>
+        <TreeSelect
+          showSearch
+          style={{
+            marginRight: "1.25rem",
+            marginLeft: "1.25rem",
+          }}
+          value={value}
+          dropdownStyle={{
+            maxHeight: 400,
+            overflow: "auto",
+          }}
+          placeholder="Please select"
+          allowClear
+          multiple
+          treeDefaultExpandAll
+          onChange={onChange}
+          treeData={treeData}
+        />
+      </div>
     </div>
   );
 };
