@@ -39,7 +39,7 @@ const ProductImages = () => {
           </Carousel>
 
           <div className="flex justify-center my-3">
-            <button className="border rounded-xl w-1/3 py-1 border-black text-black hover:bg-black hover:text-white">
+            <button className="border rounded-md w-1/3 py-1 border-black text-black hover:bg-black hover:text-white">
               Add Images
             </button>
           </div>
