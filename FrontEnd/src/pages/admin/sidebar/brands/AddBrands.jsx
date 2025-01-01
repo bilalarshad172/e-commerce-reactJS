@@ -1,53 +1,7 @@
-import React, { useState } from "react";
-import { TreeSelect } from "antd";
-
-const treeData = [
-  {
-    value: "parent 1",
-    title: "parent 1",
-    children: [
-      {
-        value: "parent 1-0",
-        title: "parent 1-0",
-        children: [
-          {
-            value: "leaf1",
-            title: "my leaf",
-          },
-          {
-            value: "leaf2",
-            title: "your leaf",
-          },
-        ],
-      },
-      {
-        value: "parent 1-1",
-        title: "parent 1-1",
-        children: [
-          {
-            value: "sss",
-            title: (
-              <b
-                style={{
-                  color: "#08c",
-                }}
-              >
-                sss
-              </b>
-            ),
-          },
-        ],
-      },
-    ],
-  },
-];
+import React from "react";
 
 const AddBrands = () => {
-  const [value, setValue] = useState();
-  const onChange = (newValue) => {
-    console.log(newValue);
-    setValue(newValue);
-  };
+  
   return (
     <div className="border rounded-md shadow-md mt-5">
       <div className="flex items-center justify-between mx-5">

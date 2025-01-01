@@ -75,7 +75,7 @@ const Categories = () => {
     <div className="border rounded-md shadow-md mt-5">
       <div className="flex justify-between items-center mx-5">
         <div className=" mt-2 text-xl font-semibold">Categories</div>
-        <div>
+        <div className="mt-4">
           <NavLink
             to="/admin/categories/add"
             className="border rounded-md px-2 py-1 mt-3 border-black text-black hover:bg-black hover:text-white">

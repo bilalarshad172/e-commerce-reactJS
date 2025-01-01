@@ -16,6 +16,7 @@ import Categories from "./pages/admin/sidebar/categories/Categories";
 import AddBrands from "./pages/admin/sidebar/brands/AddBrands";
 import AddCategories from "./pages/admin/sidebar/categories/AddCategories";
 import Brands from "./pages/admin/sidebar/brands/Brands";
+import OrderDetails from "./pages/admin/sidebar/order/OrderDetails";
 
 function App() {
   return (
@@ -37,6 +38,7 @@ function App() {
           <Route path="brands" element={<Brands />} />
           <Route path="content" element={<ContentManagement />} />
           <Route path="orders" element={<Orders />} />
+          <Route path="orders/detail" element={<OrderDetails />} />
           <Route path="users" element={<Users />} />
           <Route path="settings" element={<Settings />} />
         </Route>
