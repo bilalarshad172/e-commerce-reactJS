@@ -3,6 +3,7 @@ import mongoose from "mongoose";
 import dotenv from "dotenv";
 import authRoutes from "./routes/auth.route.js";
 import CategoryRoutes from "./routes/category.route.js";
+import BrandRoutes from "./routes/brands.route.js";
 
 dotenv.config();
 
@@ -25,4 +26,4 @@ app.use(express.json());
 
 app.use("/api/auth", authRoutes);
 app.use("/api/", CategoryRoutes);
-app.use("/api/", CategoryRoutes);
+app.use("/api/", BrandRoutes);
