@@ -8,7 +8,7 @@ const categorySchema = new mongoose.Schema(
       unique: true, // To ensure category names are unique
     },
     value: {
-      type: Number,
+      type: String,
       required: true,
       unique: true, // To ensure unique identifiers for each category
     },
@@ -17,6 +17,12 @@ const categorySchema = new mongoose.Schema(
       ref: "Category", // Reference to another category for nested structure
       default: null, // Root categories will have null as parent
     },
+    children: [
+      {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: "Category",
+      },
+    ],
   },
   { timestamps: true } // Automatically manages `createdAt` and `updatedAt`
 );
