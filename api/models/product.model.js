@@ -27,17 +27,17 @@ const productSchema = new mongoose.Schema(
         },
         countInStock :{
             type: Number,
-            required: true
         },
         imageUrl :{
             type: String,
-            required: true
         },
         rating :{
             type: Number,
-            required: true
         },
     },
     { timestamps: true }
     
 );
+
+const Product = mongoose.model("Product", productSchema);
+export default Product;
