@@ -3,6 +3,7 @@ import { useDispatch, useSelector } from "react-redux";
 import { signupSuccess, clearError } from "../../redux/authSlice";
 import { useNavigate, Link } from "react-router-dom";
 import bgImage from "../../assets/bg-10.jpg";
+import OAuth from "../../components/OAuth";
 
 const Signup = () => {
   const [signupData, setSignupData] = useState({
@@ -103,12 +104,13 @@ const Signup = () => {
                 required
               />
               <button
-                className="border rounded-xl w-1/3 py-1 bg-black text-white hover:opacity-80"
+                className="border rounded-xl w-1/2 py-1 bg-black text-white hover:opacity-80"
                 disabled={signupData.password !== signupData.confirmPassword}
                 type="submit"
               >
-                Signup
+                Sign up
               </button>
+              <OAuth/>
               <div className="flex flex-col items-center">
                 <p className="text-white">Already have an account?</p>
                 <Link className="text-blue-500 underline" to="/">

@@ -3,6 +3,7 @@ import { useDispatch, useSelector } from "react-redux";
 import { loginSuccess, clearError } from "../../redux/authSlice";
 import { Link, useNavigate } from "react-router-dom";
 import bgImage from "../../assets/background.jpg";
+import OAuth from "../../components/OAuth";
 
 const login = () => {
   const [loginData, setLoginData] = useState({
@@ -87,11 +88,12 @@ const login = () => {
               required
             />
             <button
-              className="border rounded-xl w-1/3 py-1 bg-black text-white hover:opacity-80"
+              className="border rounded-xl w-1/2 py-1 bg-black text-white hover:opacity-80"
               type="submit"
             >
               Login
-            </button>
+              </button>
+              <OAuth/>
             <div className="flex flex-col items-center">
               <p className="text-white">Dont have and account?</p>
               <Link className="text-blue-500 underline" to="/signup">
