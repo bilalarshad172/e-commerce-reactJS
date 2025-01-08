@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { useDispatch, useSelector } from "react-redux";
-import { loginSuccess, clearError } from "../../redux/authSlice";
+import { getUser } from "../../redux/authSlice";
 import { Link, useNavigate } from "react-router-dom";
 import bgImage from "../../assets/background.jpg";
 import OAuth from "../../components/OAuth";
@@ -13,7 +13,7 @@ const login = () => {
   const [isImageLoaded, setIsImageLoaded] = useState(false);
   const dispatch = useDispatch();
   const navigate = useNavigate();
-  const { isAuthenticated, error } = useSelector((state) => state.auth);
+  const { loading, error, isAuthenticated } = useSelector((state) => state.auth);
 
   useEffect(() => {
     // Create a new Image object.
@@ -32,17 +32,25 @@ const login = () => {
     }));
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
     const { email, password } = loginData;
 
-    // Dispatch login action
-    dispatch(loginSuccess({ email, password }));
-    if (!error) {
-      // Navigate to login page on successful signup
-      navigate("/products");
+    try {
+      const resultAction = await dispatch(getUser({ email, password }));
+
+      // Check if login was successful
+      if (getUser.fulfilled.match(resultAction)) {
+        // Navigate to the products page on successful login
+        navigate("/products");
+      } else {
+        console.error("Login failed:", resultAction.payload || "Unknown error");
+      }
+    } catch (error) {
+      console.error("An error occurred during login:", error.message);
     }
-    // Clear form
+
+    // Clear form fields
     setLoginData({
       email: "",
       password: "",
@@ -89,9 +97,10 @@ const login = () => {
             />
             <button
               className="border rounded-xl w-1/2 py-1 bg-black text-white hover:opacity-80"
-              type="submit"
+                type="submit"
+                disabled={loading}
             >
-              Login
+             {loading ? "Logging in..." : "Login"}
               </button>
               <OAuth/>
             <div className="flex flex-col items-center">

@@ -10,6 +10,20 @@ const OAuth = () => {
             const auth = getAuth(app)
             const result = await signInWithPopup(auth, provider)
             console.log(result);
+            const res = await fetch('/api/auth/google', {
+            
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({
+                    name: result.user.displayName,
+                    email: result.user.email,
+                    photoURL: result.user.photoURL
+                })
+            })
+            const data = await res.json();
+            
         } catch (error) {
             console.log(error)
         }

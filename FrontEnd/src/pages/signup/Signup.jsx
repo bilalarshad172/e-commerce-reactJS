@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { useDispatch, useSelector } from "react-redux";
-import { signupSuccess, clearError } from "../../redux/authSlice";
+import { signupUser } from "../../redux/authSlice";
 import { useNavigate, Link } from "react-router-dom";
 import bgImage from "../../assets/bg-10.jpg";
 import OAuth from "../../components/OAuth";
@@ -15,7 +15,7 @@ const Signup = () => {
   const [isImageLoaded, setIsImageLoaded] = useState(false);
   const dispatch = useDispatch();
   const navigate = useNavigate();
-  const { error } = useSelector((state) => state.auth);
+  const { error, loading } = useSelector((state) => state.auth);
 
   useEffect(() => {
     // Create a new Image object.
@@ -33,14 +33,35 @@ const Signup = () => {
       [name]: value,
     }));
   };
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    const { name, email, password } = signupData;
-    dispatch(signupSuccess({ name, email, password }));
-    if (!error) {
-      // Navigate to login page on successful signup
-      navigate("/");
+    const { name, email, password, confirmPassword } = signupData;
+
+    if (password !== confirmPassword) {
+      alert("Passwords do not match!");
+      return;
     }
+
+    try {
+      const resultAction = await dispatch(
+        signupUser({ name, email, password })
+      );
+
+      // Check if signup was successful
+      if (signupUser.fulfilled.match(resultAction)) {
+        // Navigate to login page on successful signup
+        navigate("/");
+      } else {
+        console.error(
+          "Signup failed:",
+          resultAction.payload || "Unknown error"
+        );
+      }
+    } catch (error) {
+      console.error("An error occurred during signup:", error.message);
+    }
+
+    // Reset form fields
     setSignupData({
       name: "",
       email: "",
@@ -105,12 +126,12 @@ const Signup = () => {
               />
               <button
                 className="border rounded-xl w-1/2 py-1 bg-black text-white hover:opacity-80"
-                disabled={signupData.password !== signupData.confirmPassword}
+                disabled={loading}
                 type="submit"
               >
-                Sign up
+                {loading ? "Signing up..." : "Sign Up"}
               </button>
-              <OAuth/>
+              <OAuth />
               <div className="flex flex-col items-center">
                 <p className="text-white">Already have an account?</p>
                 <Link className="text-blue-500 underline" to="/">
