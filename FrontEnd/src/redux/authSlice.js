@@ -1,7 +1,5 @@
 import { createSlice, createAsyncThunk } from "@reduxjs/toolkit";
 
-
-
 export const signupUser = createAsyncThunk(
   "auth/signupUser",
   async (signupData, { rejectWithValue }) => {

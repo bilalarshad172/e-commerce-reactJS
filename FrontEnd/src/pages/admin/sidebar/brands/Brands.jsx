@@ -1,30 +1,32 @@
-import React from "react";
+import React, { useEffect } from "react";
 import { Table, Button, Space } from "antd";
 import { EditOutlined, DeleteOutlined } from "@ant-design/icons";
 import { NavLink } from "react-router-dom";
+import { fetchBrands } from "../../../../redux/brandsSlice";
+import { useDispatch, useSelector } from "react-redux";
 
 const columns = [
   {
     title: "Name",
-    dataIndex: "name",
+    dataIndex: "title",
     key: "name",
   },
   {
     title: "Actions",
     key: "actions",
-    dataIndex: "key", // Use `key` to uniquely identify rows
+    dataIndex: "_id", // Use `key` to uniquely identify rows
     align: "right",
     render: (text, record) => (
-      <Space>
+      <Space key={record._id}>
         <Button
           type="text"
           icon={<EditOutlined style={{ color: "#1890ff" }} />}
-          onClick={() => handleEdit(record.key)}
+          onClick={() => handleEdit(record._id)}
         />
         <Button
           type="text"
           icon={<DeleteOutlined style={{ color: "red" }} />}
-          onClick={() => handleDelete(record.key)}
+          onClick={() => handleDelete(record._id)}
         />
       </Space>
     ),
@@ -39,20 +41,12 @@ const handleDelete = (id) => {
   console.log("Delete category with ID:", id);
 };
 
-const data = [
-  {
-    key: "1",
-    name: "Summer Collection",
-    
-  },
-  {
-    key: "4",
-    name: "Winter Collection",
-   
-  },
-];
-
 const Brands = () => {
+  const { brands, loading, error } = useSelector((state) => state.brands);
+  const dispatch = useDispatch();
+  useEffect(() => {
+    dispatch(fetchBrands());
+  }, [dispatch]);
   return (
     <div className="border rounded-md shadow-md mt-5">
       <div className="flex justify-between items-center mx-5">
@@ -60,7 +54,8 @@ const Brands = () => {
         <div className="mt-4">
           <NavLink
             to="/admin/brands/add"
-            className="border rounded-md px-2 py-1 mt-3 border-black text-black hover:bg-black hover:text-white">
+            className="border rounded-md px-2 py-1 mt-3 border-black text-black hover:bg-black hover:text-white"
+          >
             Add Brands
           </NavLink>
         </div>
@@ -69,9 +64,10 @@ const Brands = () => {
       <div className="mt-5">
         <Table
           columns={columns}
-          dataSource={data}
+          loading={loading}
+          dataSource={brands.map((brand) => ({ ...brand, key: brand._id }))}
           pagination={false}
-         
+          size="small"
           bordered
         />
       </div>
