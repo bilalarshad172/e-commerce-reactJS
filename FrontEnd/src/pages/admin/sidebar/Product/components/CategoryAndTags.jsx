@@ -1,5 +1,7 @@
-import React,{useState} from "react";
-import { TreeSelect } from "antd";
+import React,{useState, useEffect} from "react";
+import { TreeSelect,Select } from "antd";
+import { useSelector, useDispatch } from "react-redux";
+import { fetchBrands } from "../../../../../redux/brandsSlice";
 
 const treeData = [
   {
@@ -44,7 +46,13 @@ const treeData = [
 
 const CategoryAndTags = () => {
     
-    const [value, setValue] = useState();
+  const [value, setValue] = useState();
+  const { brands } = useSelector((state) => state.brands);
+  const dispatch = useDispatch();
+
+  useEffect(() => {
+      dispatch(fetchBrands());
+    }, [dispatch]);
   const onChange = (newValue) => {
     console.log(newValue);
     setValue(newValue);
@@ -93,6 +101,20 @@ const CategoryAndTags = () => {
             treeDefaultExpandAll
             onChange={onChange}
             treeData={treeData}
+          />
+        </div>
+        <div className="flex flex-col">
+          <label className="mx-5 font-semibold">Brands</label>
+          <Select
+            style={{
+                marginRight: "1.25rem",
+                marginLeft: "1.25rem",
+            }}
+            showSearch
+            placeholder="Select a person"
+            optionFilterProp="label"
+            
+            options={brands.map((brand) => ({ value: brand._id, label: brand.title }))}
           />
         </div>
       </div>
