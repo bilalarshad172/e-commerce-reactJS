@@ -1,49 +1,18 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
+import { useSelector, useDispatch } from "react-redux";
 import { TreeSelect } from "antd";
+import { fetchCategories } from "../../../../redux/categorySlice";
 
-const treeData = [
-  {
-    value: "parent 1",
-    title: "parent 1",
-    children: [
-      {
-        value: "parent 1-0",
-        title: "parent 1-0",
-        children: [
-          {
-            value: "leaf1",
-            title: "my leaf",
-          },
-          {
-            value: "leaf2",
-            title: "your leaf",
-          },
-        ],
-      },
-      {
-        value: "parent 1-1",
-        title: "parent 1-1",
-        children: [
-          {
-            value: "sss",
-            title: (
-              <b
-                style={{
-                  color: "#08c",
-                }}
-              >
-                sss
-              </b>
-            ),
-          },
-        ],
-      },
-    ],
-  },
-];
+
 
 const AddCategories = () => {
   const [value, setValue] = useState();
+  const { categories } = useSelector((state) => state.categories);
+  const dispatch = useDispatch();
+
+  useEffect(() => {
+    dispatch(fetchCategories());
+  }, [dispatch]);
   const onChange = (newValue) => {
     console.log(newValue);
     setValue(newValue);
@@ -78,7 +47,10 @@ const AddCategories = () => {
           multiple
           treeDefaultExpandAll
           onChange={onChange}
-          treeData={treeData}
+          treeData={categories?.categories?.map((category) => ({
+            ...category,
+            key: category.id, // Assuming `id` is the unique key for each category
+          }))}
         />
       </div>
     </div>

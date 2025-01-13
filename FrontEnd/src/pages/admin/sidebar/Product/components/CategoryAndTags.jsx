@@ -2,6 +2,7 @@ import React,{useState, useEffect} from "react";
 import { TreeSelect,Select } from "antd";
 import { useSelector, useDispatch } from "react-redux";
 import { fetchBrands } from "../../../../../redux/brandsSlice";
+import { fetchCategories } from "../../../../../redux/categorySlice";
 
 const treeData = [
   {
@@ -48,10 +49,12 @@ const CategoryAndTags = () => {
     
   const [value, setValue] = useState();
   const { brands } = useSelector((state) => state.brands);
+  const { categories } = useSelector((state) => state.categories);
   const dispatch = useDispatch();
 
   useEffect(() => {
-      dispatch(fetchBrands());
+    dispatch(fetchBrands());
+    dispatch(fetchCategories());
     }, [dispatch]);
   const onChange = (newValue) => {
     console.log(newValue);
@@ -79,7 +82,10 @@ const CategoryAndTags = () => {
             multiple
             treeDefaultExpandAll
             onChange={onChange}
-            treeData={treeData}
+            treeData={categories?.categories?.map((category) => ({
+            ...category,
+            key: category.id, // Assuming `id` is the unique key for each category
+          }))}
           />
         </div>
         <div className="flex flex-col">
