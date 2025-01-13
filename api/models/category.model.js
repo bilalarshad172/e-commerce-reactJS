@@ -4,13 +4,7 @@ const categorySchema = new mongoose.Schema(
   {
     title: {
       type: String,
-      required: true,
-      unique: true, // To ensure category names are unique
-    },
-    value: {
-      type: String,
-      required: true,
-      unique: true, // To ensure unique identifiers for each category
+      required: true,   
     },
     parent: {
       type: mongoose.Schema.Types.ObjectId,
@@ -26,7 +20,7 @@ const categorySchema = new mongoose.Schema(
   },
   { timestamps: true } // Automatically manages `createdAt` and `updatedAt`
 );
-
+categorySchema.index({ title: 1, parent: 1 }, { unique: true });
 const Category = mongoose.model("Category", categorySchema);
 
 export default Category;

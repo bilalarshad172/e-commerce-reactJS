@@ -6,9 +6,7 @@ import mongoose from "mongoose";
  */
 export const categories = async (req, res) => {
   try {
-    const { title, value, parent } = req.body;
-
-    console.log("Parent ID received:", parent);
+    const { title, parent } = req.body;
 
     // Validate parent ID if present
     if (parent && !mongoose.Types.ObjectId.isValid(parent)) {
@@ -28,7 +26,6 @@ export const categories = async (req, res) => {
     // Create the category (child or root)
     const category = new Category({
       title,
-      value,
       parent: parentCategory ? parentCategory._id : null,
     });
 
@@ -74,8 +71,7 @@ export const getCategory = async (req, res) => {
     allCategories.forEach((cat) => {
       categoryMap.set(cat._id.toString(), {
         // These are the fields you want to return
-        value: cat._id.toString(), // Unique internal ID as 'value'
-        id: cat.value,            // The category’s 'value' field as 'id'
+        _id: cat._id.toString(),            // The category’s 'value' field as 'id'
         title: cat.title,
         // We'll fill `children` after we link them up
         children: cat.children.length ? [] : null,
@@ -88,17 +84,13 @@ export const getCategory = async (req, res) => {
     // Link each category to its parent (if any)
     allCategories.forEach((cat) => {
       if (cat.parent) {
-        // If cat has a parent, find the parent in the map
         const parentInMap = categoryMap.get(cat.parent.toString());
-        // Then find the child in the map
         const childInMap = categoryMap.get(cat._id.toString());
-
         if (parentInMap && childInMap) {
-          parentInMap.children = parentInMap.children || [];
           parentInMap.children.push(childInMap);
         }
       } else {
-        // If no parent => it's a root category
+        // It's a root category
         rootCategories.push(categoryMap.get(cat._id.toString()));
       }
     });
@@ -111,7 +103,125 @@ export const getCategory = async (req, res) => {
     console.error("Error retrieving categories:", err.message);
     res.status(500).json({
       message: "Error retrieving categories",
-      error: err.message,
+      error: err.message, 
     });
   }
 };
+
+// PUT /api/categories/:id
+export const updateCategory = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const { title, parent } = req.body;
+
+    // Validate if `id` is a valid ObjectId
+    if (!mongoose.Types.ObjectId.isValid(id)) {
+      return res.status(400).json({ message: "Invalid category ID" });
+    }
+
+    // If parent is provided, validate the parent ID
+    if (parent && !mongoose.Types.ObjectId.isValid(parent)) {
+      return res.status(400).json({ message: "Invalid parent ID" });
+    }
+
+    // Optionally, if parent is not null, ensure the parent category exists
+    let parentCategory = null;
+    if (parent) {
+      parentCategory = await Category.findById(parent);
+      if (!parentCategory) {
+        return res.status(404).json({ message: "Parent category not found" });
+      }
+    }
+
+    // Update the category
+    const updatedCategory = await Category.findByIdAndUpdate(
+      id,
+      {
+        title,
+        parent: parentCategory ? parentCategory._id : null,
+      },
+      { new: true } // to return the updated document
+    );
+
+    if (!updatedCategory) {
+      return res.status(404).json({ message: "Category not found" });
+    }
+
+    // If there is a parent, update the parent's children array,
+    // but we need to ensure we remove it from the old parent's children if changed.
+    // For simplicity, let's do a small check:
+    if (parentCategory) {
+      // Make sure this category is in the parent's children array
+      if (!parentCategory.children.includes(updatedCategory._id)) {
+        parentCategory.children.push(updatedCategory._id);
+        await parentCategory.save();
+      }
+    }
+
+    // If the category had an old parent, remove it from old parent's children array if changed
+    // This step requires us to know the old parent. We can do that by reading the category
+    // before the update, or from updatedCategory if we stored old data.
+
+    res.status(200).json({
+      message: "Category updated successfully",
+      category: updatedCategory,
+    });
+  } catch (error) {
+    console.error("Error updating category:", error);
+    res.status(500).json({
+      message: "Error updating category",
+      error: error.message,
+    });
+  }
+};
+
+// DELETE /api/categories/:id
+export const deleteCategoryById = async (req, res) => {
+  try {
+    const { id } = req.params;
+
+    // Validate if `id` is a valid ObjectId
+    if (!mongoose.Types.ObjectId.isValid(id)) {
+      return res.status(400).json({ message: "Invalid category ID" });
+    }
+
+    const categoryToDelete = await Category.findById(id);
+    if (!categoryToDelete) {
+      return res.status(404).json({ message: "Category not found" });
+    }
+
+    // If this category has a parent, remove it from the parent's children array
+    if (categoryToDelete.parent) {
+      await Category.findByIdAndUpdate(categoryToDelete.parent, {
+        $pull: { children: categoryToDelete._id },
+      });
+    }
+
+    // If this category has children, we can either:
+    // 1) Also delete them, or
+    // 2) Make them all top-level (remove their parent).
+    // For simplicity, let's assume we want to set them to top-level:
+    if (categoryToDelete.children && categoryToDelete.children.length > 0) {
+      await Category.updateMany(
+        { _id: { $in: categoryToDelete.children } },
+        { $set: { parent: null } }
+      );
+    }
+
+    await Category.findByIdAndDelete(id);
+
+    res.status(200).json({
+      message: "Category deleted successfully",
+      categoryId: id,
+    });
+  } catch (error) {
+    console.error("Error deleting category:", error);
+    res.status(500).json({
+      message: "Error deleting category",
+      error: error.message,
+    });
+  }
+};
+
+
+

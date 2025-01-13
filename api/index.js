@@ -8,6 +8,7 @@ import CategoryRoutes from "./routes/category.route.js";
 import BrandRoutes from "./routes/brands.route.js";
 import ProductRoutes from "./routes/product.route.js";
 import UploadRoutes from "./routes/imageUpload.routes.js";
+import Category from "./models/category.model.js";
 import { fileURLToPath } from "url";
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -20,8 +21,12 @@ app.listen(3000, () => {
 });
 mongoose
   .connect(process.env.MONGO)
-  .then(() => {
-    console.log("Connected to MongoDB");
+  .then(async () => {
+    console.log("Database connected");
+
+    // Sync the indexes
+    await Category.syncIndexes();
+    console.log("Indexes synced successfully");
   })
   .catch((err) => {
     console.log(err);

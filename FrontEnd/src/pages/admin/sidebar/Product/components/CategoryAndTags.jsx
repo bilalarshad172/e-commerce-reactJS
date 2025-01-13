@@ -1,5 +1,5 @@
-import React,{useState, useEffect} from "react";
-import { TreeSelect,Select } from "antd";
+import React, { useState, useEffect } from "react";
+import { TreeSelect, Select } from "antd";
 import { useSelector, useDispatch } from "react-redux";
 import { fetchBrands } from "../../../../../redux/brandsSlice";
 import { fetchCategories } from "../../../../../redux/categorySlice";
@@ -46,16 +46,15 @@ const treeData = [
 ];
 
 const CategoryAndTags = () => {
-    
   const [value, setValue] = useState();
   const { brands } = useSelector((state) => state.brands);
   const { categories } = useSelector((state) => state.categories);
   const dispatch = useDispatch();
-
+  console.log(categories);
   useEffect(() => {
     dispatch(fetchBrands());
     dispatch(fetchCategories());
-    }, [dispatch]);
+  }, [dispatch]);
   const onChange = (newValue) => {
     console.log(newValue);
     setValue(newValue);
@@ -69,8 +68,8 @@ const CategoryAndTags = () => {
           <TreeSelect
             showSearch
             style={{
-                marginRight: "1.25rem",
-                marginLeft: "1.25rem",
+              marginRight: "1.25rem",
+              marginLeft: "1.25rem",
             }}
             value={value}
             dropdownStyle={{
@@ -82,10 +81,10 @@ const CategoryAndTags = () => {
             multiple
             treeDefaultExpandAll
             onChange={onChange}
-            treeData={categories?.categories?.map((category) => ({
-            ...category,
-            key: category.id, // Assuming `id` is the unique key for each category
-          }))}
+            treeData={
+              categories
+              // Assuming `id` is the unique key for each category
+            }
           />
         </div>
         <div className="flex flex-col">
@@ -93,8 +92,8 @@ const CategoryAndTags = () => {
           <TreeSelect
             showSearch
             style={{
-                marginRight: "1.25rem",
-                marginLeft: "1.25rem",
+              marginRight: "1.25rem",
+              marginLeft: "1.25rem",
             }}
             value={value}
             dropdownStyle={{
@@ -113,14 +112,16 @@ const CategoryAndTags = () => {
           <label className="mx-5 font-semibold">Brands</label>
           <Select
             style={{
-                marginRight: "1.25rem",
-                marginLeft: "1.25rem",
+              marginRight: "1.25rem",
+              marginLeft: "1.25rem",
             }}
             showSearch
             placeholder="Select a person"
             optionFilterProp="label"
-            
-            options={brands.map((brand) => ({ value: brand._id, label: brand.title }))}
+            options={brands.map((brand) => ({
+              value: brand._id,
+              label: brand.title,
+            }))}
           />
         </div>
       </div>

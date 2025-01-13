@@ -7,29 +7,30 @@ import { NavLink } from "react-router-dom";
 
 const columns = [
   {
-    title: "Name",
-    dataIndex: "title",
-    key: "name",
-  },
-  {
-    title: "Actions",
-    key: "actions",
-    dataIndex: "_id", // Use `key` to uniquely identify rows
-    align: "right",
-    render: (text, record) => (
-      <Space key={record._id}>
-        <Button
-          type="text"
-          icon={<EditOutlined style={{ color: "#1890ff" }} />}
-          onClick={() => handleEdit(record._id)}
-        />
-        <Button
-          type="text"
-          icon={<DeleteOutlined style={{ color: "red" }} />}
-        />
-      </Space>
-    ),
-  },
+  title: "Name",
+  dataIndex: "title",
+  key: "title",
+},
+{
+  title: "Actions",
+  key: "actions",
+  dataIndex: "_id",
+  align: "right",
+  render: (text, record) => (
+    <Space key={record._id}>
+      <Button
+        type="text"
+        icon={<EditOutlined style={{ color: "#1890ff" }} />}
+        onClick={() => handleEdit(record._id)}
+      />
+      <Button
+        type="text"
+        icon={<DeleteOutlined style={{ color: "red" }} />}
+        onClick={() => handleDelete(record._id)}
+      />
+    </Space>
+  ),
+},
 ];
 
 const handleEdit = (id) => {
@@ -41,28 +42,32 @@ const handleDelete = (id) => {
 };
 
 const Categories = () => {
-  const { categories, loading, error } = useSelector(
-    (state) => state.categories
+ const { categories, loading, error } = useSelector(
+  (state) => state.categories
   );
+  
   const dispatch = useDispatch();
 
   useEffect(() => {
     dispatch(fetchCategories());
   }, [dispatch]);
 
-    const assignKeys = (categories, parentKey = "") => {
-    return categories.map((category) => {
-      const uniqueKey = parentKey ? `${parentKey}-${category.id}` : category.id;
+const assignKeys = (list, parentKey = "") => {
+  return list.map((category) => {
+    const key = parentKey ? `${parentKey}-${category._id}` : category._id;
+    // If children is null or undefined, treat it as an empty array
+    const childArray = Array.isArray(category.children) ? category.children : [];
 
-      return {
-        ...category,
-        key: uniqueKey, // Assign unique key
-        children: category.children ? assignKeys(category.children, uniqueKey) : undefined, // Recursively process children
-      };
-    });
-  };
+    return {
+      ...category,
+      key,
+      children: childArray.length ? assignKeys(childArray, key) : undefined,
+    };
+  });
+};
 
-  const dataSource = assignKeys(categories.categories || []);
+  const dataSource = assignKeys(categories || []);
+  console.log(dataSource);
   return (
     <div className="border rounded-md shadow-md mt-5">
       <div className="flex justify-between items-center mx-5">
