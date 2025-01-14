@@ -1,110 +1,142 @@
 import React, { useState, useEffect } from "react";
 import { useSelector, useDispatch } from "react-redux";
-import { TreeSelect, message } from "antd";
-import { useNavigate } from "react-router-dom";
-import { fetchCategories, addCategory } from "../../../../redux/categorySlice";
+import { TreeSelect, message, Button, Form, Input, Spin } from "antd";
+import { useNavigate, useParams } from "react-router-dom";
+import {
+  fetchCategories,
+  addCategory,
+  updateCategory,
+  fetchCategoryById,
+} from "../../../../redux/categorySlice";
+import { NavLink } from "react-router-dom";
 
 const AddCategories = () => {
   const dispatch = useDispatch();
   const navigate = useNavigate();
+  const { id } = useParams();
 
   // Local state for the form
-  const [title, setTitle] = useState("");
-  const [parentCategory, setParentCategory] = useState(null);
+  const [form] = Form.useForm(); // Ant Design form instance
+  const [loading, setLoading] = useState(false);
+  const [treeData, setTreeData] = useState([]);
 
-  const { categories, loading, error } = useSelector(
-    (state) => state.categories
-  );
-  console.log(categories);
+  const {
+    selectedCategory,
+    loading: fetchLoading,
+    categories,
+  } = useSelector((state) => state.categories);
+
   // Fetch all categories for the dropdown
   useEffect(() => {
     dispatch(fetchCategories());
-  }, [dispatch]);
+    if (id) {
+      dispatch(fetchCategoryById(id));
+    }
+  }, [id, dispatch]);
 
-  const onChangeTreeSelect = (newParentId) => {
-    console.log(newParentId);
-    setParentCategory(newParentId);
-    
-  };
+  useEffect(() => {
+    if (id && selectedCategory) {
+      form.setFieldsValue({
+        title: selectedCategory.title,
+        parent: selectedCategory.parent || null,
+      });
+    }
+  }, [selectedCategory, id, form]);
 
-  
-  const transformCategories = (categories) => {
-  return categories.map((category) => ({
-    title: category.title, // Display text
-    value: category._id,   // Unique value
-    children: category.children ? transformCategories(category.children) : null, // Recursively map children
-  }));
-  };
-  const treeData = transformCategories(categories);
-  // Handle form submission
-  const handleSaveCategory = async () => {
-    // Build a category payload for the server
-    const categoryData = {
-      title,// The unique slug/identifier
-      parent: parentCategory,
+  useEffect(() => {
+    const transformCategories = (categories) => {
+      return categories.map((cat) => ({
+        title: cat.title,
+        value: cat._id,
+        children: cat.children ? transformCategories(cat.children) : null,
+      }));
     };
 
-    // Dispatch Redux action
-   try {
-    await dispatch(addCategory(categoryData)).unwrap();
-    setTitle("");
-     setParentCategory(null);
-     message.success("Category added successfully!");
+    if (categories) {
+      setTreeData(transformCategories(categories));
+    }
+  }, [categories]);
+
+  const handleSubmit = async (values) => {
+    setLoading(true);
+    try {
+      if (id) {
+        // Edit mode
+        await dispatch(updateCategory({ id, ...values })).unwrap();
+        message.success("Category updated successfully!");
+      } else {
+        // Add mode
+        await dispatch(addCategory(values)).unwrap();
+        message.success("Category added successfully!");
+      }
       navigate("/admin/categories");
-  } catch (error) {
-    console.error("Failed to add category:", error);
-    message.error(error); // Display a toast notification or error message
-  }
+    } catch (error) {
+      message.error("Something went wrong: " + error.message);
+    } finally {
+      setLoading(false);
+    }
   };
 
+  if (id && fetchLoading) {
+    // Show a loading spinner while fetching category details
+    return (
+      <div className="flex justify-center items-center h-screen">
+        <Spin size="large" />
+      </div>
+    );
+  }
+
   return (
-    <div className="border rounded-md shadow-md mt-5">
-      <div className="flex items-center justify-between mx-5">
-        <h3 className=" mt-2 text-xl font-semibold">Add Categories</h3>
-        <button
-          className="border rounded-md px-2 py-1 mt-3 border-black text-black hover:bg-black hover:text-white"
-          onClick={handleSaveCategory}
+    <div className="border rounded-md shadow-md mt-5 p-5">
+      <h2 className="text-xl font-semibold mb-3">
+        {id ? "Edit Category" : "Add Category"}
+      </h2>
+
+      <Form
+        form={form}
+        layout="vertical"
+        onFinish={handleSubmit}
+        initialValues={{
+          title: "",
+          parent: null,
+        }}
+      >
+        <Form.Item
+          label="Category Name"
+          name="title"
+          rules={[
+            { required: true, message: "Please enter the category name" },
+          ]}
         >
-          Save
-        </button>
-      </div>
+          <Input placeholder="Enter category name" />
+        </Form.Item>
 
-      <div className="flex flex-col mt-3">
-        <label className="mx-5 font-semibold">Category Name</label>
-        <input
-          type="text"
-          className="border rounded mx-5 p-1"
-          id="cat_name"
-          value={title}
-          onChange={(e) => setTitle(e.target.value)}
-        />
-      </div>
-
-
-      <div className="flex flex-col mb-5">
-        <label className="mx-5 font-semibold">Parent Category Name</label>
-        <TreeSelect
-          showSearch
-          style={{
-            marginRight: "1.25rem",
-            marginLeft: "1.25rem",
-          }}
-          value={parentCategory}
-          dropdownStyle={{
-            maxHeight: 400,
-            overflow: "auto",
-          }}
-          placeholder="Please select"
-          allowClear
-          treeDefaultExpandAll
-          onChange={onChangeTreeSelect}
-          // If you don't need multiple parent categories, remove `multiple`
-          treeData={treeData}
-        />
-      </div>
-
-      {loading && <p>Loading...</p>}
-      {error && <p className="text-red-500">{error}</p>}
+        <Form.Item label="Parent Category" name="parent">
+          <TreeSelect
+            showSearch
+            placeholder="Select parent category"
+            allowClear
+            treeDefaultExpandAll
+            treeData={treeData}
+          />
+        </Form.Item>
+        <div className="flex gap-2 items-center my-3">
+           <button
+            className="border rounded-md px-2 py-1 mt-3 border-black text-black hover:bg-black hover:text-white"
+            type="submit"
+            loading={loading || fetchLoading}
+          >
+            {id ? "Update Category" : "Add Category"}
+          </button>
+          <NavLink
+            to={"/admin/categories"}
+            className="border rounded-md px-2 py-1 mt-3 border-black text-black hover:bg-black hover:text-white"
+          >
+            Cancel
+          </NavLink>
+         
+        </div>
+      </Form>
     </div>
   );
 };

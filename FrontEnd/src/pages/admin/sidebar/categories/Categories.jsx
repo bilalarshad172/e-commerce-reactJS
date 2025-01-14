@@ -1,73 +1,86 @@
 import React, { useEffect } from "react";
-import { Table, Button, Space } from "antd";
-import { EditOutlined, DeleteOutlined } from "@ant-design/icons";
-import { fetchCategories } from "../../../../redux/categorySlice";
+import { Table, Button, Space,Modal, message } from "antd";
+import { EditOutlined, DeleteOutlined, ExclamationCircleOutlined, } from "@ant-design/icons";
+import { fetchCategories, deleteCategory } from "../../../../redux/categorySlice";
 import { useDispatch, useSelector } from "react-redux";
-import { NavLink } from "react-router-dom";
-
-const columns = [
-  {
-  title: "Name",
-  dataIndex: "title",
-  key: "title",
-},
-{
-  title: "Actions",
-  key: "actions",
-  dataIndex: "_id",
-  align: "right",
-  render: (text, record) => (
-    <Space key={record._id}>
-      <Button
-        type="text"
-        icon={<EditOutlined style={{ color: "#1890ff" }} />}
-        onClick={() => handleEdit(record._id)}
-      />
-      <Button
-        type="text"
-        icon={<DeleteOutlined style={{ color: "red" }} />}
-        onClick={() => handleDelete(record._id)}
-      />
-    </Space>
-  ),
-},
-];
-
-const handleEdit = (id) => {
-  console.log("Edit category with ID:", id);
-};
-
-const handleDelete = (id) => {
-  console.log("Delete category with ID:", id);
-};
+import { NavLink, useNavigate } from "react-router-dom";
 
 const Categories = () => {
- const { categories, loading, error } = useSelector(
-  (state) => state.categories
+  const { categories, loading, error } = useSelector(
+    (state) => state.categories
   );
-  
   const dispatch = useDispatch();
+  const navigate = useNavigate();
 
+  const assignKeys = (list, parentKey = "") => {
+    return list.map((category) => {
+      const key = parentKey ? `${parentKey}-${category._id}` : category._id;
+      // If children is null or undefined, treat it as an empty array
+      const childArray = Array.isArray(category.children)
+        ? category.children
+        : [];
+
+      return {
+        ...category,
+        key,
+        children: childArray.length ? assignKeys(childArray, key) : undefined,
+      };
+    });
+  };
+  const dataSource = assignKeys(categories || []);
+
+  const columns = [
+    {
+      title: "Name",
+      dataIndex: "title",
+      key: "title",
+    },
+    {
+      title: "Actions",
+      key: "actions",
+      dataIndex: "_id",
+      align: "right",
+      render: (text, record) => (
+        <Space key={record._id}>
+          <Button
+            type="text"
+            icon={<EditOutlined style={{ color: "#1890ff" }} />}
+            onClick={() => handleEdit(record._id)}
+          />
+          <Button
+            type="text"
+            icon={<DeleteOutlined style={{ color: "red" }} />}
+            onClick={() => handleDelete(record._id)}
+          />
+        </Space>
+      ),
+    },
+  ];
   useEffect(() => {
     dispatch(fetchCategories());
   }, [dispatch]);
 
-const assignKeys = (list, parentKey = "") => {
-  return list.map((category) => {
-    const key = parentKey ? `${parentKey}-${category._id}` : category._id;
-    // If children is null or undefined, treat it as an empty array
-    const childArray = Array.isArray(category.children) ? category.children : [];
+  const handleEdit = (id) => {
+    navigate(`/admin/categories/edit/${id}`);
+  };
 
-    return {
-      ...category,
-      key,
-      children: childArray.length ? assignKeys(childArray, key) : undefined,
-    };
-  });
-};
-
-  const dataSource = assignKeys(categories || []);
-  console.log(dataSource);
+  const handleDelete = (id) => {
+    Modal.confirm({
+          title: "Are you sure you want to delete this Category?",
+          icon: <ExclamationCircleOutlined />,
+          okText: "Yes",
+          cancelText: "No",
+          onOk: () => {
+            dispatch(deleteCategory(id))
+              .then(() => {
+                message.success("Category deleted successfully");
+              })
+              .catch((error) => {
+                message.error("Failed to delete Category: " + error.message);
+              });
+          },
+        });
+  };
   return (
     <div className="border rounded-md shadow-md mt-5">
       <div className="flex justify-between items-center mx-5">

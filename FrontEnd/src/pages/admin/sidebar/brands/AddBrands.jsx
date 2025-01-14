@@ -66,7 +66,7 @@ const AddBrands = () => {
 
   return (
     <div className="border rounded-md shadow-md mt-5 p-5">
-      <h2 className="text-xl font-semibold">
+      <h2 className="text-xl font-semibold mb-3">
         {id ? "Edit Brand" : "Add Brand"}
       </h2>
       <Form
@@ -90,56 +90,22 @@ const AddBrands = () => {
             defaultValue={id && brand ? brand.title : ""}
           />
         </Form.Item>
-        <Button
-          style={{
-            border: "1px solid black",
-            borderRadius: "0.375rem", // Tailwind's rounded-md equivalent
-            padding: "0.25rem 0.5rem", // Tailwind's px-2 py-1 equivalent
-            marginTop: "0.75rem", // Tailwind's mt-3 equivalent
-            color: "black",
-            backgroundColor: "white",
-            cursor: "pointer",
-            transition: "background-color 0.3s, color 0.3s", // Smooth hover effect
-          }}
-          onMouseEnter={(e) => {
-            e.target.style.backgroundColor = "black";
-            e.target.style.color = "white";
-          }}
-          onMouseLeave={(e) => {
-            e.target.style.backgroundColor = "white";
-            e.target.style.color = "black";
-          }}
+        <button
+          className="border rounded-md px-2 py-1 mt-3 border-black text-black hover:bg-black hover:text-white"
+        
           type="default"
           htmlType="submit"
           loading={loading || fetchLoading}
         >
           {id ? "Update Brand" : "Add Brand"}
-        </Button>
-        <Button
-            style={{
-            border: "1px solid black",
-            borderRadius: "0.375rem", // Tailwind's rounded-md equivalent
-            padding: "0.25rem 0.5rem", // Tailwind's px-2 py-1 equivalent
-            marginTop: "0.75rem", // Tailwind's mt-3 equivalent
-            color: "black",
-            backgroundColor: "white",
-            cursor: "pointer",
-            transition: "background-color 0.3s, color 0.3s", // Smooth hover effect
-          }}
-          onMouseEnter={(e) => {
-            e.target.style.backgroundColor = "black";
-            e.target.style.color = "white";
-          }}
-          onMouseLeave={(e) => {
-            e.target.style.backgroundColor = "white";
-            e.target.style.color = "black";
-          }}
+        </button>
+        <button
+           className="border rounded-md px-2 py-1 mt-3 border-black text-black hover:bg-black hover:text-white ml-2"
           type="default"
-          className="ml-2"
           onClick={() => navigate("/admin/brands")}
         >
           Cancel
-        </Button>
+        </button>
       </Form>
     </div>
   );

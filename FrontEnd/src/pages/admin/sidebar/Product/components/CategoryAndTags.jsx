@@ -50,7 +50,14 @@ const CategoryAndTags = () => {
   const { brands } = useSelector((state) => state.brands);
   const { categories } = useSelector((state) => state.categories);
   const dispatch = useDispatch();
-  console.log(categories);
+  const transformCategories = (categories) => {
+  return categories.map((category) => ({
+    title: category.title, // Display text
+    value: category._id,   // Unique value
+    children: category.children ? transformCategories(category.children) : null, // Recursively map children
+  }));
+  };
+  const treeData = transformCategories(categories);
   useEffect(() => {
     dispatch(fetchBrands());
     dispatch(fetchCategories());
@@ -65,30 +72,6 @@ const CategoryAndTags = () => {
         <h3 className="mx-5 mt-2 text-xl font-semibold">Categories</h3>
         <div className="flex flex-col mt-3">
           <label className="mx-5 font-semibold">Product Category</label>
-          <TreeSelect
-            showSearch
-            style={{
-              marginRight: "1.25rem",
-              marginLeft: "1.25rem",
-            }}
-            value={value}
-            dropdownStyle={{
-              maxHeight: 400,
-              overflow: "auto",
-            }}
-            placeholder="Please select"
-            allowClear
-            multiple
-            treeDefaultExpandAll
-            onChange={onChange}
-            treeData={
-              categories
-              // Assuming `id` is the unique key for each category
-            }
-          />
-        </div>
-        <div className="flex flex-col">
-          <label className="mx-5 font-semibold">Product Tags</label>
           <TreeSelect
             showSearch
             style={{

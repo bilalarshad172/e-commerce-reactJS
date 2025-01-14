@@ -18,7 +18,7 @@ export const fetchCategories = createAsyncThunk(
 
 export const addCategory = createAsyncThunk(
   "categories/addCategory",
-    async (categoryData, { rejectWithValue }) => {
+  async (categoryData, { rejectWithValue }) => {
     try {
       const response = await fetch("/api/categories", {
         method: "POST",
@@ -28,34 +28,18 @@ export const addCategory = createAsyncThunk(
         body: JSON.stringify(categoryData),
       });
       if (!response.ok) {
-          const errorData = await response.json();
-          console.error("Error response:", errorData);
+        const errorData = await response.json();
+        console.error("Error response:", errorData);
         throw new Error(errorData.message || "Failed to add category");
-        }
-        
-        return await response.json();
-        
+      }
+
+      return await response.json();
     } catch (error) {
-        console.error("Error in addCategory:", error.message);
+      console.error("Error in addCategory:", error.message);
       return rejectWithValue(error.message);
     }
   }
 );
-
-// export const deleteCategory = createAsyncThunk(
-//   "categories/deleteCategory",
-//   async (id, { rejectWithValue }) => {
-//     try {
-//       const response = await fetch(`/api/categories/${id}`, {
-//         method: "DELETE",
-//       });
-//       if (!response.ok) throw new Error("Failed to delete category");
-//       return id; // Return the ID of the deleted category
-//     } catch (error) {
-//       return rejectWithValue(error.message);
-//     }
-//   }
-// );
 
 export const fetchCategoryById = createAsyncThunk(
   "categories/fetchCategoryById",
@@ -73,14 +57,15 @@ export const fetchCategoryById = createAsyncThunk(
 
 export const updateCategory = createAsyncThunk(
   "categories/updateCategory",
-  async ({ id, updates }, { rejectWithValue }) => {
+  async ({ id, ...updates }, { rejectWithValue }) => {
     try {
       const response = await fetch(`/api/categories/${id}`, {
         method: "PUT",
         headers: {
           "Content-Type": "application/json",
-        },
-        body: JSON.stringify(updates),
+         
+          },
+         body: JSON.stringify(updates),
       });
       if (!response.ok) {
         const errorData = await response.json();
@@ -134,7 +119,7 @@ const categorySlice = createSlice({
         state.loading = true;
         state.error = null;
       })
-        .addCase(fetchCategories.fulfilled, (state, action) => {
+      .addCase(fetchCategories.fulfilled, (state, action) => {
         state.categories = action.payload.categories;
         state.loading = false;
       })
@@ -191,16 +176,13 @@ const categorySlice = createSlice({
       })
       .addCase(updateCategory.fulfilled, (state, action) => {
         state.loading = false;
-        const updated = action.payload.category; // from res.json()
-        // Find index in state.categories array and update
+        const updated = action.payload.category; // server returns { message, category: {...} }
+        // find index in state.categories (which is an array)
         const index = state.categories.findIndex(
           (cat) => cat._id === updated._id
         );
         if (index !== -1) {
-          state.categories.categories[index] = {
-            ...state.categories.categories[index],
-            ...updated,
-          };
+          state.categories[index] = { ...state.categories[index], ...updated };
         }
       })
       .addCase(updateCategory.rejected, (state, action) => {
