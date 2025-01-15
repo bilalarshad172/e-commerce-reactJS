@@ -28,7 +28,7 @@ const Sidebar = () => {
       </li>
       <li className="p-4 border-b flex items-center gap-2">
         <NavLink
-          to="/admin/products"
+          to="/admin/products/table"
           className={({ isActive }) =>
             isActive
               ? "text-green-500 border-l-4 border-green-500 pl-2 flex items-center gap-2"

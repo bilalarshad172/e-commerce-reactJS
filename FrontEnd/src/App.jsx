@@ -17,6 +17,7 @@ import AddBrands from "./pages/admin/sidebar/brands/AddBrands";
 import AddCategories from "./pages/admin/sidebar/categories/AddCategories";
 import Brands from "./pages/admin/sidebar/brands/Brands";
 import OrderDetails from "./pages/admin/sidebar/order/OrderDetails";
+import ProductTable from "./pages/admin/sidebar/Product/ProductTable";
 
 function App() {
   return (
@@ -31,7 +32,8 @@ function App() {
         <Route path="/admin" element={<AdminLayout />}>
           <Route index element={<Navigate to="/admin/dashboard" />} />
           <Route path="dashboard" element={<Dashboard/>} />
-          <Route path="products" element={<AddProduct />} />
+          <Route path="products/table" element={<ProductTable />} />
+          <Route path="products/add" element={<AddProduct />} />
           <Route path="categories" element={<Categories />} />
           <Route path="categories/add" element={<AddCategories />} />
           <Route path="categories/edit/:id" element={<AddCategories />} />

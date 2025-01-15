@@ -1,5 +1,6 @@
 import React, { useState } from "react";
 import { Table, Button, Space, Menu, Checkbox, Dropdown } from "antd";
+import { NavLink } from "react-router-dom";
 
 const initialColumns = [
   {
@@ -59,7 +60,6 @@ const initialColumns = [
     key: "last_activity",
   },
 ];
-
 
 const data = [
   {
@@ -129,62 +129,71 @@ const data = [
     last_activity: "2024-12-25",
   },
 ];
+const ProductTable = () => {
+  const [columns, setColumns] = useState(initialColumns);
+  const [visibleColumns, setVisibleColumns] = useState(
+    initialColumns.map((col) => col.key)
+  );
 
-const Users = () => {
-  
-   const [columns, setColumns] = useState(initialColumns);
-    const [visibleColumns, setVisibleColumns] = useState(
-      initialColumns.map((col) => col.key)
+  const handleColumnToggle = (key) => {
+    setVisibleColumns((prev) =>
+      prev.includes(key)
+        ? prev.filter((columnKey) => columnKey !== key)
+        : [...prev, key]
     );
-  
-    const handleColumnToggle = (key) => {
-      setVisibleColumns((prev) =>
-        prev.includes(key)
-          ? prev.filter((columnKey) => columnKey !== key)
-          : [...prev, key]
-      );
-    };
-  
-    const filteredColumns = columns.filter((col) =>
-      visibleColumns.includes(col.key)
-    );
-  
-    const menu = (
-      <Menu>
-        {initialColumns.map((col) => (
-          <Menu.Item key={col.key}>
-            <Checkbox
-              checked={visibleColumns.includes(col.key)}
-              onChange={() => handleColumnToggle(col.key)}
-            >
-              {typeof col.title === "string" ? col.title : "Checkbox"}
-            </Checkbox>
-          </Menu.Item>
-        ))}
-      </Menu>
-    );
+  };
+
+  const filteredColumns = columns.filter((col) =>
+    visibleColumns.includes(col.key)
+  );
+
+  const menu = (
+    <Menu>
+      {initialColumns.map((col) => (
+        <Menu.Item key={col.key}>
+          <Checkbox
+            checked={visibleColumns.includes(col.key)}
+            onChange={() => handleColumnToggle(col.key)}
+          >
+            {typeof col.title === "string" ? col.title : "Checkbox"}
+          </Checkbox>
+        </Menu.Item>
+      ))}
+    </Menu>
+  );
+
   return (
-     <div className="border rounded-md shadow-md mt-5">
-          <h3 className="text-2xl font-semibold ml-5">Users</h3>
-          <div className="flex justify-between items-center mt-5 mx-5">
-            <div>
-              <input
-                type="text"
-                className="border p-1 rounded-md"
-                placeholder="Search Users"
-              />
-            </div>
-            <div>
-              <Dropdown overlay={menu} trigger={["click"]}>
-                <Button>Columns</Button>
-              </Dropdown>
-            </div>
+    <div className="container mx-auto px-4">
+      <div className="border rounded-md shadow-md mt-5 ">
+        <div className="flex justify-between items-center mx-5">
+          <h3 className="text-2xl font-semibold">Products</h3>
+          <NavLink
+            to="/admin/products/add"
+            className="border rounded-md px-2 py-1 mt-3 border-black text-black hover:bg-black hover:text-white"
+          >
+            Add Products
+          </NavLink>
+        </div>
+        <div className="flex justify-between items-center mt-5 mx-5">
+          <div>
+            <input
+              type="text"
+              className="border p-1 rounded-md"
+              placeholder="Search Products"
+            />
           </div>
-          <div className="mt-5">
-            <Table size="small" columns={filteredColumns} dataSource={data} />
+          <div>
+            <Dropdown overlay={menu} trigger={["click"]}>
+              <Button>Columns</Button>
+            </Dropdown>
           </div>
         </div>
-  )
-}
+        <div className="mt-5 mx-5">
+          <Table size="small" columns={filteredColumns} dataSource={data} />
+        </div>
+      </div>
+    </div>
+  );
+};
 
-export default Users
+export default ProductTable;
