@@ -1,6 +1,14 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { Table, Button, Space, Menu, Checkbox, Dropdown } from "antd";
 import { NavLink } from "react-router-dom";
+import {
+  EditOutlined,
+  DeleteOutlined,
+  ExclamationCircleOutlined,
+} from "@ant-design/icons";
+import { useDispatch, useSelector } from "react-redux";
+import { fetchProducts } from "../../../../redux/productSlice";
+import defaultImage from "../../../../assets/default.png";
 
 const initialColumns = [
   {
@@ -25,111 +33,71 @@ const initialColumns = [
     ),
   },
   {
-    title: "Name",
-    dataIndex: "name",
-    key: "name",
-  },
-  {
-    title: "Email",
-    dataIndex: "email",
-    key: "email",
-  },
-  {
-    title: "Phone",
-    dataIndex: "phone",
-    key: "phone",
-  },
-  {
-    title: "Country",
-    dataIndex: "country",
-    key: "country",
-  },
-  {
-    title: "Orders",
-    dataIndex: "orders",
-    key: "orders",
-  },
-  {
-    title: "Total Spent",
-    dataIndex: "total_spent",
-    key: "total_spent",
-  },
-  {
-    title: "Last Activity",
-    dataIndex: "last_activity",
-    key: "last_activity",
-  },
-];
+    title: "Image",
+    dataIndex: "images",
+    key: "images",
+    render: (_, record) => {
+      const imageSrc = record.file?.link || defaultImage;
 
-const data = [
-  {
-    key: "1",
-    checkbox: false,
-    name: "John Doe",
-    email: "johndoe@example.com",
-    phone: "+1 123-456-7890",
-    country: "United States",
-    orders: 15,
-    total_spent: "$1,200.00",
-    last_activity: "2024-12-30",
+      // A small inline handler to replace the broken image with the default
+      const handleImageError = (e) => {
+        e.target.src = defaultImage;
+      };
+
+      return (
+        <img
+          src={imageSrc}
+          alt={record.product_name}
+          onError={handleImageError}
+          style={{ width: "40px", height: "40px", objectFit: "cover" }}
+        />
+      );
+    },
   },
   {
-    key: "2",
-    checkbox: false,
-    name: "Jane Smith",
-    email: "janesmith@example.com",
-    phone: "+44 7700-900123",
-    country: "United Kingdom",
-    orders: 8,
-    total_spent: "$950.00",
-    last_activity: "2024-12-29",
+    title: "Product Name",
+    dataIndex: "title",
+    key: "product_name",
   },
   {
-    key: "3",
-    checkbox: false,
-    name: "Alice Johnson",
-    email: "alicej@example.com",
-    phone: "+91 98765-43210",
-    country: "India",
-    orders: 20,
-    total_spent: "$2,150.00",
-    last_activity: "2024-12-28",
+    title: "Brand",
+    dataIndex: ["brand", "title"],
+    key: "brand",
   },
   {
-    key: "4",
-    checkbox: false,
-    name: "Bob Williams",
-    email: "bobwilliams@example.com",
-    phone: "+61 400-123-456",
-    country: "Australia",
-    orders: 12,
-    total_spent: "$1,000.00",
-    last_activity: "2024-12-27",
+    title: "Price",
+    dataIndex: "price",
+    key: "price",
   },
   {
-    key: "5",
-    checkbox: false,
-    name: "Emma Brown",
-    email: "emmabrown@example.com",
-    phone: "+81 90-1234-5678",
-    country: "Japan",
-    orders: 10,
-    total_spent: "$1,500.00",
-    last_activity: "2024-12-26",
+    title: "Inventory",
+    dataIndex: "countInStock",
+    key: "inventory",
   },
   {
-    key: "6",
-    checkbox: false,
-    name: "Michael Davis",
-    email: "michaeld@example.com",
-    phone: "+49 151-23456789",
-    country: "Germany",
-    orders: 5,
-    total_spent: "$500.00",
-    last_activity: "2024-12-25",
+    title: "Actions",
+    key: "actions",
+    dataIndex: "_id", // Use `key` to uniquely identify rows
+    align: "right",
+    render: (text, record) => (
+      <Space key={record._id}>
+        <Button
+          type="text"
+          icon={<EditOutlined style={{ color: "#1890ff" }} />}
+          onClick={() => handleEdit(record._id)}
+        />
+        <Button
+          type="text"
+          icon={<DeleteOutlined style={{ color: "red" }} />}
+          onClick={() => handleDelete(record._id)}
+        />
+      </Space>
+    ),
   },
 ];
 const ProductTable = () => {
+  const dispatch = useDispatch();
+  const { products, loading, error } = useSelector((state) => state.products);
   const [columns, setColumns] = useState(initialColumns);
   const [visibleColumns, setVisibleColumns] = useState(
     initialColumns.map((col) => col.key)
@@ -147,6 +115,10 @@ const ProductTable = () => {
     visibleColumns.includes(col.key)
   );
 
+  useEffect(() => {
+    dispatch(fetchProducts());
+  }, [dispatch]);
+  console.log(products);
   const menu = (
     <Menu>
       {initialColumns.map((col) => (
@@ -189,7 +161,14 @@ const ProductTable = () => {
           </div>
         </div>
         <div className="mt-5 mx-5">
-          <Table size="small" columns={filteredColumns} dataSource={data} />
+          <Table
+            size="small"
+            columns={filteredColumns}
+            dataSource={products.map((product) => ({
+              ...product,
+              key: product._id,
+            }))}
+          />
         </div>
       </div>
     </div>

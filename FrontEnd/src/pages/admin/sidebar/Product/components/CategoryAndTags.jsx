@@ -4,68 +4,45 @@ import { useSelector, useDispatch } from "react-redux";
 import { fetchBrands } from "../../../../../redux/brandsSlice";
 import { fetchCategories } from "../../../../../redux/categorySlice";
 
-const treeData = [
-  {
-    value: "parent 1",
-    title: "parent 1",
-    children: [
-      {
-        value: "parent 1-0",
-        title: "parent 1-0",
-        children: [
-          {
-            value: "leaf1",
-            title: "my leaf",
-          },
-          {
-            value: "leaf2",
-            title: "your leaf",
-          },
-        ],
-      },
-      {
-        value: "parent 1-1",
-        title: "parent 1-1",
-        children: [
-          {
-            value: "sss",
-            title: (
-              <b
-                style={{
-                  color: "#08c",
-                }}
-              >
-                sss
-              </b>
-            ),
-          },
-        ],
-      },
-    ],
-  },
-];
-
-const CategoryAndTags = () => {
-  const [value, setValue] = useState();
+const CategoryAndTags = ({ category, setCategory, brand, setBrand }) => {
   const { brands } = useSelector((state) => state.brands);
   const { categories } = useSelector((state) => state.categories);
+  const [treeValue, setTreeValue] = useState(category);
   const dispatch = useDispatch();
-  const transformCategories = (categories) => {
-  return categories.map((category) => ({
-    title: category.title, // Display text
-    value: category._id,   // Unique value
-    children: category.children ? transformCategories(category.children) : null, // Recursively map children
-  }));
-  };
-  const treeData = transformCategories(categories);
+
   useEffect(() => {
     dispatch(fetchBrands());
     dispatch(fetchCategories());
   }, [dispatch]);
-  const onChange = (newValue) => {
-    console.log(newValue);
-    setValue(newValue);
+
+  useEffect(() => {
+    // If "category" from parent changes for any reason, sync local treeValue
+    setTreeValue(category);
+  }, [category]);
+
+  const transformCategories = (categories) => {
+    return categories.map((category) => ({
+      title: category.title, // Display text
+      value: category._id, // Unique value
+      children: category.children
+        ? transformCategories(category.children)
+        : null, // Recursively map children
+    }));
   };
+
+  const treeData = transformCategories(categories);
+
+  const onCategoryChange = (newValue) => {
+    setTreeValue(newValue);
+    // If you allow multiple categories, you might store an array
+    // but let's assume single category for simplicity:
+    setCategory(newValue);
+  };
+
+  const onBrandChange = (val) => {
+    setBrand(val);
+  };
+
   return (
     <div className="border rounded-md shadow-md mt-5">
       <div className="mb-3">
@@ -78,7 +55,7 @@ const CategoryAndTags = () => {
               marginRight: "1.25rem",
               marginLeft: "1.25rem",
             }}
-            value={value}
+            value={treeValue}
             dropdownStyle={{
               maxHeight: 400,
               overflow: "auto",
@@ -87,7 +64,7 @@ const CategoryAndTags = () => {
             allowClear
             multiple
             treeDefaultExpandAll
-            onChange={onChange}
+            onChange={onCategoryChange}
             treeData={treeData}
           />
         </div>
@@ -101,6 +78,8 @@ const CategoryAndTags = () => {
             showSearch
             placeholder="Select a person"
             optionFilterProp="label"
+            value={brand}
+            onChange={onBrandChange}
             options={brands.map((brand) => ({
               value: brand._id,
               label: brand.title,

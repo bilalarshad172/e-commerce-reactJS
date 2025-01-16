@@ -5,7 +5,7 @@ import { useParams } from "react-router-dom";
 import Footer from "../../components/Footer";
 import {
   fetchProductById,
-  clearSelectedProduct,
+  resetCreateStatus,
 } from "../../redux/productSlice";
 
 const ProductView = () => {
@@ -20,7 +20,7 @@ const ProductView = () => {
     dispatch(fetchProductById(id));
     // Cleanup: Clear selected product when component unmounts
     return () => {
-      dispatch(clearSelectedProduct());
+      dispatch(resetCreateStatus());
     };
   }, [dispatch, id]);
 

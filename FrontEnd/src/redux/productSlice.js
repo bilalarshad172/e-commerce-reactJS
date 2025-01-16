@@ -1,14 +1,14 @@
 import { createSlice, createAsyncThunk } from "@reduxjs/toolkit";
 
 // API URL (replace with your API endpoint)
-const API_URL = "https://fakestoreapi.com/products"; // Example endpoint
+const API_URL = "https://fakestoreapi.com/products"; 
 
 // Thunk to fetch products
 export const fetchProducts = createAsyncThunk(
   "products/fetchProducts",
   async (_, { rejectWithValue }) => {
     try {
-      const response = await fetch(API_URL);
+      const response = await fetch("/api/products");
       if (!response.ok) throw new Error("Failed to fetch products");
       const data = await response.json();
       return data; // Pass the fetched data to Redux
@@ -37,6 +37,28 @@ export const fetchProductById = createAsyncThunk(
   }
 );
 
+export const createProduct = createAsyncThunk(
+  "products/createProduct",
+  async (product, { rejectWithValue }) => {
+    try {
+      const response = await fetch("/api/products", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(product),
+      });
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.message || "Failed to add Product");
+      }
+      return await response.json();
+    } catch (error) {
+      return rejectWithValue(error.message);
+    }
+  }
+);
+
 
 // Initial state
 const initialState = {
@@ -44,6 +66,7 @@ const initialState = {
   selectedProduct: null,
   loading: false,
   error: null,
+  createSuccess: false,
 };
 
 // Product slice
@@ -51,12 +74,30 @@ const productSlice = createSlice({
   name: "products",
   initialState,
   reducers: {
-    clearSelectedProduct: (state) => {
-      state.selectedProduct = null; // Clear selected product when needed
+    resetCreateStatus: (state) => {
+      state.createSuccess = false;
+      state.error = null;
     },
   },
   extraReducers: (builder) => {
     builder
+      //Add product cases
+       .addCase(createProduct.pending, (state) => {
+        state.loading = true;
+        state.error = null;
+        state.createSuccess = false;
+      })
+      .addCase(createProduct.fulfilled, (state, action) => {
+        state.loading = false;
+        state.createSuccess = true;
+        // optionally add the newly created product to products list
+        state.products.push(action.payload);
+      })
+      .addCase(createProduct.rejected, (state, action) => {
+        state.loading = false;
+        state.createSuccess = false;
+        state.error = action.payload || "Something went wrong!";
+      })
       // fetch all products
       .addCase(fetchProducts.pending, (state) => {
         state.loading = true;
@@ -64,7 +105,7 @@ const productSlice = createSlice({
       })
       .addCase(fetchProducts.fulfilled, (state, action) => {
         state.loading = false;
-        state.products = action.payload;
+        state.products = action.payload.products;
       })
       .addCase(fetchProducts.rejected, (state, action) => {
         state.loading = false;
@@ -88,5 +129,5 @@ const productSlice = createSlice({
 });
 
 
-export const { clearSelectedProduct } = productSlice.actions;
+export const { resetCreateStatus } = productSlice.actions;
 export default productSlice.reducer;
