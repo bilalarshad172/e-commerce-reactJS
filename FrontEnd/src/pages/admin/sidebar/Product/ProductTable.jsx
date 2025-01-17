@@ -1,103 +1,113 @@
 import React, { useState, useEffect } from "react";
-import { Table, Button, Space, Menu, Checkbox, Dropdown } from "antd";
-import { NavLink } from "react-router-dom";
+import {
+  Table,
+  Button,
+  Space,
+  Menu,
+  Checkbox,
+  message,
+  Dropdown,
+  Modal,
+} from "antd";
+import { NavLink, useNavigate } from "react-router-dom";
 import {
   EditOutlined,
   DeleteOutlined,
   ExclamationCircleOutlined,
 } from "@ant-design/icons";
 import { useDispatch, useSelector } from "react-redux";
-import { fetchProducts } from "../../../../redux/productSlice";
+import { fetchProducts, deleteProduct } from "../../../../redux/productSlice";
 import defaultImage from "../../../../assets/default.png";
 
-const initialColumns = [
-  {
-    title: (
-      <input
-        id="multiselect_products"
-        type="checkbox"
-        className="bulk-checkbox"
-      />
-    ),
-    dataIndex: "checkbox",
-    key: "checkbox",
-    onCell: (record) => ({
-      onClick: (e) => e.stopPropagation(), // Prevent row click when clicking on this cell
-    }),
-    render: (text, record) => (
-      <input
-        type="checkbox"
-        name="product_id"
-        onClick={(e) => e.stopPropagation()}
-      />
-    ),
-  },
-  {
-    title: "Image",
-    dataIndex: "images",
-    key: "images",
-    render: (_, record) => {
-      const imageSrc = record.file?.link || defaultImage;
-
-      // A small inline handler to replace the broken image with the default
-      const handleImageError = (e) => {
-        e.target.src = defaultImage;
-      };
-
-      return (
-        <img
-          src={imageSrc}
-          alt={record.product_name}
-          onError={handleImageError}
-          style={{ width: "40px", height: "40px", objectFit: "cover" }}
-        />
-      );
-    },
-  },
-  {
-    title: "Product Name",
-    dataIndex: "title",
-    key: "product_name",
-  },
-  {
-    title: "Brand",
-    dataIndex: ["brand", "title"],
-    key: "brand",
-  },
-  {
-    title: "Price",
-    dataIndex: "price",
-    key: "price",
-  },
-  {
-    title: "Inventory",
-    dataIndex: "countInStock",
-    key: "inventory",
-  },
-  {
-    title: "Actions",
-    key: "actions",
-    dataIndex: "_id", // Use `key` to uniquely identify rows
-    align: "right",
-    render: (text, record) => (
-      <Space key={record._id}>
-        <Button
-          type="text"
-          icon={<EditOutlined style={{ color: "#1890ff" }} />}
-          onClick={() => handleEdit(record._id)}
-        />
-        <Button
-          type="text"
-          icon={<DeleteOutlined style={{ color: "red" }} />}
-          onClick={() => handleDelete(record._id)}
-        />
-      </Space>
-    ),
-  },
-];
 const ProductTable = () => {
   const dispatch = useDispatch();
+  const navigate = useNavigate();
   const { products, loading, error } = useSelector((state) => state.products);
+  const initialColumns = [
+    {
+      title: (
+        <input
+          id="multiselect_products"
+          type="checkbox"
+          className="bulk-checkbox"
+        />
+      ),
+      dataIndex: "checkbox",
+      key: "checkbox",
+      onCell: (record) => ({
+        onClick: (e) => e.stopPropagation(), // Prevent row click when clicking on this cell
+      }),
+      render: (text, record) => (
+        <input
+          type="checkbox"
+          name="product_id"
+          onClick={(e) => e.stopPropagation()}
+        />
+      ),
+    },
+    {
+      title: "Image",
+      dataIndex: "images",
+      key: "images",
+      render: (_, record) => {
+        const imageSrc = record.images?.[0] || defaultImage;
+
+        // A small inline handler to replace the broken image with the default
+        const handleImageError = (e) => {
+          e.target.src = defaultImage;
+        };
+
+        return (
+          <img
+            src={imageSrc}
+            alt={record.product_name}
+            onError={handleImageError}
+            style={{ width: "40px", height: "40px", objectFit: "cover" }}
+          />
+        );
+      },
+    },
+    {
+      title: "Product Name",
+      dataIndex: "title",
+      key: "product_name",
+    },
+    {
+      title: "Brand",
+      dataIndex: ["brand", "title"],
+      key: "brand",
+    },
+    {
+      title: "Price",
+      dataIndex: "price",
+      key: "price",
+    },
+    {
+      title: "Inventory",
+      dataIndex: "countInStock",
+      key: "inventory",
+    },
+    {
+      title: "Actions",
+      key: "actions",
+      dataIndex: "_id", // Use `key` to uniquely identify rows
+      align: "right",
+      render: (text, record) => (
+        <Space key={record._id}>
+          {/* <Button
+            type="text"
+            icon={<EditOutlined style={{ color: "#1890ff" }} />}
+            onClick={() => handleEdit(record._id)}
+          /> */}
+          <Button
+            type="text"
+            icon={<DeleteOutlined style={{ color: "red" }} />}
+            onClick={() => handleDelete(record._id)}
+          />
+        </Space>
+      ),
+    },
+  ];
   const [columns, setColumns] = useState(initialColumns);
   const [visibleColumns, setVisibleColumns] = useState(
     initialColumns.map((col) => col.key)
@@ -118,7 +128,7 @@ const ProductTable = () => {
   useEffect(() => {
     dispatch(fetchProducts());
   }, [dispatch]);
-  console.log(products);
+
   const menu = (
     <Menu>
       {initialColumns.map((col) => (
@@ -133,6 +143,28 @@ const ProductTable = () => {
       ))}
     </Menu>
   );
+
+  const handleDelete = (id) => {
+    Modal.confirm({
+      title: "Are you sure you want to delete this Product?",
+      icon: <ExclamationCircleOutlined />,
+      okText: "Yes",
+      cancelText: "No",
+      onOk: () => {
+        dispatch(deleteProduct(id))
+          .then(() => {
+            message.success("Product deleted successfully");
+          })
+          .catch((error) => {
+            message.error("Failed to delete Product: " + error.message);
+          });
+      },
+    });
+  };
+
+  const handleRowClick = (record) => {
+    navigate(`/admin/products/${record._id}/edit`);
+  };
 
   return (
     <div className="container mx-auto px-4">
@@ -163,11 +195,17 @@ const ProductTable = () => {
         <div className="mt-5 mx-5">
           <Table
             size="small"
+            loading={loading}
+            rowKey={(record) => record._id}
             columns={filteredColumns}
             dataSource={products.map((product) => ({
               ...product,
               key: product._id,
             }))}
+            onRow={(record) => ({
+              onClick: () => handleRowClick(record),
+              style: { cursor: "pointer" }, // <-- Add this line
+            })}
           />
         </div>
       </div>

@@ -34,6 +34,7 @@ function App() {
           <Route path="dashboard" element={<Dashboard/>} />
           <Route path="products/table" element={<ProductTable />} />
           <Route path="products/add" element={<AddProduct />} />
+          <Route path="products/:id/edit" element={<AddProduct />} />
           <Route path="categories" element={<Categories />} />
           <Route path="categories/add" element={<AddCategories />} />
           <Route path="categories/edit/:id" element={<AddCategories />} />

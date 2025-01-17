@@ -7,11 +7,11 @@ const AdminLayout = () => {
   return (
     <div className="">
       <Header />
-      <div className="grid grid-cols-4 gap-4">
+      <div className="grid grid-cols-5 gap-4">
         <div className="col-span-1">
           <Sidebar />
         </div>
-        <div className="col-span-3">
+        <div className="col-span-4">
           {/* Render the active route's component here */}
           <Outlet />
         </div>
