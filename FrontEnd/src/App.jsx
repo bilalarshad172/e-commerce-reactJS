@@ -52,17 +52,17 @@ function App() {
         <Route
           path="/products"
           element={
-            <ProtectedRoute>
+            // <ProtectedRoute>
               <ProductListing />
-            </ProtectedRoute>
+            // </ProtectedRoute>
           }
         />
         <Route
           path="/products/:id"
           element={
-            <ProtectedRoute>
+            // <ProtectedRoute>
               <ProductView />
-            </ProtectedRoute>
+            // </ProtectedRoute>
           }
         />
       </Routes>
