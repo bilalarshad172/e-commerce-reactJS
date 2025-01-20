@@ -104,6 +104,8 @@ const initialState = {
   products: [],
   productForEdit: null,
   loading: false,
+   loadingSingleProduct: false,
+  loadingAllProducts: false,
   error: null,
   createSuccess: false,
 };
@@ -139,30 +141,30 @@ const productSlice = createSlice({
       })
       // fetch all products
       .addCase(fetchProducts.pending, (state) => {
-        state.loading = true;
+        state.loadingAllProducts = true;
         state.error = null;
       })
       .addCase(fetchProducts.fulfilled, (state, action) => {
-        state.loading = false;
+        state.loadingAllProducts = false;
         state.products = action.payload.products;
       })
       .addCase(fetchProducts.rejected, (state, action) => {
-        state.loading = false;
+        state.loadingAllProducts = false;
         state.error = action.payload;
       })
 
       // Fetch single product by ID
       .addCase(fetchProductById.pending, (state) => {
-        state.loading = true;
+        state.loadingSingleProduct = true;
         state.error = null;
         state.productForEdit = null;
       })
       .addCase(fetchProductById.fulfilled, (state, action) => {
-        state.loading = false;
+        state.loadingSingleProduct = false;
         state.productForEdit = action.payload;
       })
       .addCase(fetchProductById.rejected, (state, action) => {
-        state.loading = false;
+        state.loadingSingleProduct = false;
         state.error = action.payload;
         state.productForEdit = null;
       })
@@ -187,6 +189,7 @@ const productSlice = createSlice({
       .addCase(updateProduct.fulfilled, (state, action) => {
         // If you want to update state.products to reflect the new data
         // Find the index of the updated product and replace it or merge changes
+        state.loading = false;
         const updated = action.payload; // updated product from server
         const index = state.products.findIndex((p) => p._id === updated._id);
         if (index !== -1) {
