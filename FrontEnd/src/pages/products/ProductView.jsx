@@ -23,7 +23,7 @@ const ProductView = () => {
     return () => {
       dispatch(resetCreateStatus());
     };
-  }, [dispatch]);
+  }, [dispatch, id]);
 
   // console.log('ProductView render', { loading, productForEdit })
 
@@ -61,28 +61,28 @@ const ProductView = () => {
   return (
     <>
       <Header />
-      <div className=" gap-20 mt-10 mx-20 ">
-        <h1 className="text-2xl text-center font-sans font-bold">
-          {productForEdit?.title}
-        </h1>
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-42 items-center">
+
+      <div className=" gap-20  mx-20 ">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-42 justify-between items-center border mt-10 rounded-md shadow-md">
           {/* Image Container */}
-          <div className="">
-            <div className="w-full max-w-lg h-96  flex items-center justify-center overflow-hidden">
-              <img
-                className="w-full h-full object-contain"
-                src={imageSrc}
-                onError={handleImageError}
-                alt={productForEdit?.title}
-              />
-            </div>
+
+          <div className="w-full max-w-lg p-4 h-96   overflow-hidden">
+            <img
+              className="w-full h-full object-contain"
+              src={imageSrc}
+              onError={handleImageError}
+              alt={productForEdit?.title}
+            />
           </div>
 
           {/* Product Details */}
-          <div className=" min-h-96 max-h-full p-20">
-            <h2 className="text-xl  font-bold">
-              Price: ${productForEdit?.price}
-            </h2>
+          <div className=" min-h-96 bg-[#e0dfdf] rounded-md  max-h-full px-20 py-10">
+            <div className="flex justify-between items-center">
+              <h1 className="text-2xl    font-sans font-bold">
+                {productForEdit?.title}
+              </h1>
+              <h2 className="text-xl font-bold">${productForEdit?.price}</h2>
+            </div>
             <small className="block my-2">
               Brand: <Tag color="blue">{productForEdit?.brand?.title}</Tag>
             </small>
@@ -95,7 +95,7 @@ const ProductView = () => {
               ))}
             </small>
 
-            <div className="flex flex-col  justify-center gap-2">
+            <div className="flex flex-col  justify-center mt-5 gap-2">
               <h6 className="text-xl font-semibold"> Select Quantity</h6>
               <div className="flex items-center gap-2">
                 <button
@@ -116,11 +116,14 @@ const ProductView = () => {
                 Add to cart
               </button>
             </div>
-            <div className="px-2 mt-2">
-              <h4 className="text-xl font-semibold"> Product Description</h4>
-              <hr className="my-2" />
-              <p className="py-1">{productForEdit?.description}</p>
-            </div>
+          </div>
+        </div>
+
+        <div className="mt-10">
+          <div className="px-2 mt-2">
+            <h4 className="text-xl font-semibold"> Product Description</h4>
+            <hr className="my-2" />
+            <p className="py-1">{productForEdit?.description}</p>
           </div>
         </div>
         <div className="mt-10">

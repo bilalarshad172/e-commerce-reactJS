@@ -32,7 +32,8 @@ mongoose
     console.log(err);
   });
 
-app.use(express.json());
+app.use(express.json({ limit: '10mb' })); 
+app.use(express.urlencoded({ limit: '10mb', extended: true }));
 app.use(
   cors({
     origin: "http://localhost:5174", // or "*"
@@ -45,10 +46,7 @@ app.use("/api/auth", authRoutes);
 app.use("/api/", CategoryRoutes);
 app.use("/api/", BrandRoutes);
 app.use("/api/", ProductRoutes);
-app.use("/api/", UploadRoutes);
+app.use('/api', UploadRoutes);
 
-app.use((err, req, res, next) => {
-  const statusCode = err.statusCode || 500;
-  const message = err.message || "Internal Server Error";
-  return res.status(statusCode).json({ message, statusCode, success: false });
-});
+
+
