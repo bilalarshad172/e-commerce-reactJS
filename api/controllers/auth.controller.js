@@ -4,7 +4,7 @@ import bcrypt from "bcryptjs";
 // Signup controller
 
 export const signup = async (req, res, next) => {
-  const { username, email, password } = req.body;
+  const { username, email, password, phone } = req.body;
 
   try {
     // Check if email already exists
@@ -17,7 +17,7 @@ export const signup = async (req, res, next) => {
     const hashedPassword = await bcrypt.hash(password, 10);
 
     // Create a new user
-    const newUser = new User({ username, email, password: hashedPassword });
+    const newUser = new User({ username, email, password: hashedPassword, phone });
     await newUser.save();
 
     res.status(201).json({ message: "User created successfully!" });
@@ -48,3 +48,12 @@ export const login = async (req, res, next) => {
     next(error); // Pass the error to error-handling middleware
   }
 };
+
+export const getAllUsers = async (req, res, next) => {
+  try {
+    const users = await User.find();
+    res.status(200).json(users);
+  } catch (error) {
+    next(error);
+  }
+}

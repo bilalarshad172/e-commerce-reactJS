@@ -50,7 +50,7 @@ const Card = () => {
               src={imageSrc}
               alt={product.title}
               onError={handleImageError}
-              className="h-40 mx-auto"
+              className="h-40 mx-auto object-contain"
             />
             <h4 className="font-bold">{product.title}</h4>
             <p>${product.price}</p>

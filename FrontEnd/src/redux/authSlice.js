@@ -13,6 +13,7 @@ export const signupUser = createAsyncThunk(
           username: signupData.name, // Ensure consistency as discussed earlier
           email: signupData.email,
           password: signupData.password,
+          phone: signupData.phone,
         }),
       });
 
@@ -46,6 +47,24 @@ export const getUser = createAsyncThunk(
       }
 
       return await response.json(); // Assuming the API returns user data
+    } catch (error) {
+      return rejectWithValue(error.message);
+    }
+  }
+);
+
+export const getAllUsers = createAsyncThunk(
+  "auth/getAllUsers",
+  async (_, { rejectWithValue }) => {
+    try {
+      const response = await fetch("/api/auth/users");
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.message || "Failed to fetch users");
+      }
+
+      return await response.json();
     } catch (error) {
       return rejectWithValue(error.message);
     }
@@ -88,10 +107,7 @@ const authSlice = createSlice({
       .addCase(signupUser.rejected, (state, action) => {
         state.loading = false;
         state.error = action.payload;
-      });
-
-    // Handle getUser
-    builder
+      })
       .addCase(getUser.pending, (state) => {
         state.loading = true;
         state.error = null;
@@ -103,6 +119,19 @@ const authSlice = createSlice({
         state.error = null;
       })
       .addCase(getUser.rejected, (state, action) => {
+        state.loading = false;
+        state.error = action.payload;
+      })
+      .addCase(getAllUsers.pending, (state) => {
+        state.loading = true;
+        state.error = null;
+      })
+      .addCase(getAllUsers.fulfilled, (state, action) => {
+        state.loading = false;
+        state.error = null;
+        state.users = action.payload;
+      })
+      .addCase(getAllUsers.rejected, (state, action) => {
         state.loading = false;
         state.error = action.payload;
       });

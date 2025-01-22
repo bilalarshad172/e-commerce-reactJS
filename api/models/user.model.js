@@ -16,6 +16,15 @@ const userSchema = new mongoose.Schema(
       type: String,
       required: true,
     },
+    phone: {
+      fullPhoneNumber: {
+        type: String,
+        required: true, // Ensure the phone number is mandatory
+      },
+      isoCode: {
+        type: String, // Ensure the ISO code is mandatory
+      },
+    },
     role: {
       type: String,
       default: "user",

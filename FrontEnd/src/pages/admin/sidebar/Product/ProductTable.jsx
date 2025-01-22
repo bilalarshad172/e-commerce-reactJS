@@ -92,6 +92,9 @@ const ProductTable = () => {
       key: "actions",
       dataIndex: "_id", // Use `key` to uniquely identify rows
       align: "right",
+      onCell: () => ({
+        onClick: (e) => e.stopPropagation(),
+      }),
       render: (text, record) => (
         <Space key={record._id}>
           {/* <Button

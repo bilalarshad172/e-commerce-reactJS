@@ -4,6 +4,7 @@ import bcrypt from "bcryptjs";
 const adminUser = {
   username: "Admin User",
   email: "admin@admin.com",
+  phone:{ fullPhoneNumber: "+923367327796", isoCode: "pk" },
   password: "admin123", // Plain text password, will hash this before saving
   role: "admin", // Admin role
 };
@@ -12,7 +13,8 @@ const seedAdminUser = async () => {
   try {
     // Delete all existing users with the role 'admin'
     await User.deleteMany({ role: "admin" });
-    console.log("All previous admin users have been deleted.");
+    await User.deleteMany({ role: "user" });
+    console.log("All previous users have been deleted.");
 
     // Hash the password
     const hashedPassword = await bcrypt.hash(adminUser.password, 10);

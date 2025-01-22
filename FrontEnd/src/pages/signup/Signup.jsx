@@ -4,6 +4,7 @@ import { signupUser } from "../../redux/authSlice";
 import { useNavigate, Link } from "react-router-dom";
 import bgImage from "../../assets/bg-10.jpg";
 import OAuth from "../../components/OAuth";
+import PhoneInputField from "../../components/PhoneInput";
 
 const Signup = () => {
   const [signupData, setSignupData] = useState({
@@ -11,6 +12,7 @@ const Signup = () => {
     email: "",
     password: "",
     confirmPassword: "",
+    phone: "",
   });
   const [isImageLoaded, setIsImageLoaded] = useState(false);
   const dispatch = useDispatch();
@@ -35,7 +37,8 @@ const Signup = () => {
   };
   const handleSubmit = async (e) => {
     e.preventDefault();
-    const { name, email, password, confirmPassword } = signupData;
+    const { name, email, password, confirmPassword, phone } = signupData;
+    console.log(signupData);
 
     if (password !== confirmPassword) {
       alert("Passwords do not match!");
@@ -44,13 +47,13 @@ const Signup = () => {
 
     try {
       const resultAction = await dispatch(
-        signupUser({ name, email, password })
+        signupUser({ name, email, password, phone })
       );
 
       // Check if signup was successful
       if (signupUser.fulfilled.match(resultAction)) {
         // Navigate to login page on successful signup
-        navigate("/");
+        navigate("/products");
       } else {
         console.error(
           "Signup failed:",
@@ -67,6 +70,7 @@ const Signup = () => {
       email: "",
       password: "",
       confirmPassword: "",
+      phone: "",
     });
   };
   return (
@@ -123,6 +127,10 @@ const Signup = () => {
                 placeholder="Confirm Password"
                 onChange={handelChange}
                 required
+              />
+              <PhoneInputField
+                setSignupData={setSignupData}
+                signupData={signupData}
               />
               <button
                 className="border rounded-xl w-1/2 py-1 bg-black text-white hover:opacity-80"
