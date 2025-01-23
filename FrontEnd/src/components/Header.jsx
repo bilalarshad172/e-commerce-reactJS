@@ -3,6 +3,7 @@ import { useDispatch, useSelector } from "react-redux";
 import { logout, clearError } from "../redux/authSlice";
 import { useNavigate } from "react-router-dom";
 import { FaShoppingCart, FaSignOutAlt } from "react-icons/fa";
+import Profile from "./Profile";
 
 const Header = () => {
   const dispatch = useDispatch();
@@ -27,10 +28,14 @@ const Header = () => {
         placeholder="Search By name"
       />
       <div className="flex items-center gap-5">
+        
         <div className="flex items-center gap-2">
           <FaShoppingCart className="text-2xl text-gray-700 cursor-pointer hover:text-blue-500 transition duration-300">
             <span className="text-lg font-medium">Cart</span>
           </FaShoppingCart>
+        </div>
+        <div>
+        <Profile/>
         </div>
         <div
           className="flex items-center gap-1 cursor-pointer text-gray-700 hover:text-blue-500 transition duration-300"

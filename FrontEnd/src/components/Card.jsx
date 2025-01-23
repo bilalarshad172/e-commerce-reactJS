@@ -7,13 +7,13 @@ import {Spin} from 'antd';
 const Card = () => {
   const dispatch = useDispatch();
   const { products, loadingAllProducts, error } = useSelector((state) => state.products);
-  console.log(products);
+  
   const navigate = useNavigate();
   useEffect(() => {
     // Fetch products on component mount
-    console.log("Card mounted");
+  
     dispatch(fetchProducts());
-    return () => console.log("Card unmounted");
+  
   }, [dispatch]);
 
   if (loadingAllProducts) return <p className="text-center"><Spin size="large" /></p>;
