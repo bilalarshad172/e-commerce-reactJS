@@ -3,6 +3,7 @@ import mongoose from "mongoose";
 import dotenv from "dotenv";
 import path from "path";
 import cors from "cors";
+import cookieParser from "cookie-parser";
 import authRoutes from "./routes/auth.route.js";
 import CategoryRoutes from "./routes/category.route.js";
 import BrandRoutes from "./routes/brands.route.js";
@@ -15,6 +16,7 @@ const __dirname = path.dirname(__filename);
 
 dotenv.config();
 const app = express();
+app.use(cookieParser());
 app.use("/uploads", express.static(path.join(__dirname, "uploads")));
 app.listen(3000, () => {
   console.log("Server is running on port 3000!!");
@@ -38,6 +40,7 @@ app.use(
   cors({
     origin: "http://localhost:5174", // or "*"
     methods: ["GET", "POST"],
+    credentials: true,
   })
 );
 

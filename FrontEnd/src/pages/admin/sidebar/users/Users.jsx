@@ -66,7 +66,6 @@ const Users = () => {
     dispatch(getAllUsers());
   }, [dispatch]);
 
-  console.log(users);
   const handleColumnToggle = (key) => {
     setVisibleColumns((prev) =>
       prev.includes(key)

@@ -3,20 +3,33 @@ import React, { useEffect } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { fetchProducts } from "../redux/productSlice";
 import defaultImage from "../assets/default.png";
-import {Spin} from 'antd';
+import { Spin } from "antd";
 const Card = () => {
   const dispatch = useDispatch();
-  const { products, loadingAllProducts, error } = useSelector((state) => state.products);
-  
+  const { products, loadingAllProducts, error } = useSelector(
+    (state) => state.products
+  );
+
   const navigate = useNavigate();
   useEffect(() => {
     // Fetch products on component mount
-  
-    dispatch(fetchProducts());
-  
-  }, [dispatch]);
 
-  if (loadingAllProducts) return <p className="text-center"><Spin size="large" /></p>;
+    dispatch(fetchProducts())
+      .unwrap()
+      .catch((err) => {
+        // If the error is "Unauthorized", redirect
+        if (err === "Unauthorized") {
+          navigate("/");
+        }
+      });
+  }, [dispatch,navigate]);
+
+  if (loadingAllProducts)
+    return (
+      <p className="text-center">
+        <Spin size="large" />
+      </p>
+    );
   if (error) return <p className="text-red-500">Error: {error}</p>;
 
   if (!products || products.length === 0) {

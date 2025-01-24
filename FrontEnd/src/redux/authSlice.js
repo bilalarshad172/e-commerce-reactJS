@@ -71,10 +71,35 @@ export const getAllUsers = createAsyncThunk(
   }
 );
 
+export const getUserProfile = createAsyncThunk(
+  "auth/getUserProfile",
+  async (_, { rejectWithValue }) => {
+    try {
+      const response = await fetch("/api/auth/users/profile", {
+        method: "GET",
+        credentials: "include", // must include to send the cookie
+      });
+
+      if (response.status === 401 || response.status === 403) {
+        return rejectWithValue("Unauthorized");
+      }
+
+      if (!response.ok) {
+        throw new Error("Failed to fetch user profile");
+      }
+
+      return await response.json(); // the user object
+    } catch (error) {
+      return rejectWithValue(error.message);
+    }
+  }
+);
+
 const initialState = {
   isAuthenticated: false,
   user: null,
   error: null,
+  users: null,
   loading: false,
 };
 
@@ -134,6 +159,21 @@ const authSlice = createSlice({
       .addCase(getAllUsers.rejected, (state, action) => {
         state.loading = false;
         state.error = action.payload;
+      })
+      .addCase(getUserProfile.pending, (state) => {
+        state.loading = true;
+        state.error = null;
+      })
+      .addCase(getUserProfile.fulfilled, (state, action) => {
+        state.loading = false;
+        state.error = null;
+        state.user = action.payload; // store the user in Redux
+        state.isAuthenticated = true; // user is clearly authenticated
+      })
+      .addCase(getUserProfile.rejected, (state, action) => {
+        state.loading = false;
+        state.error = action.payload;
+        // If it's "Unauthorized", we might also do state.isAuthenticated = false;
       });
   },
 });

@@ -22,6 +22,7 @@ const OAuth = () => {
       // Send data to the backend
       const res = await fetch("/api/auth/google", {
         method: "POST",
+        credentials: "include",
         headers: {
           "Content-Type": "application/json",
         },

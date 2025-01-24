@@ -8,8 +8,19 @@ export const fetchProducts = createAsyncThunk(
   "products/fetchProducts",
   async (_, { rejectWithValue }) => {
     try {
-      const response = await fetch("/api/products");
-      if (!response.ok) throw new Error("Failed to fetch products");
+      const response = await fetch("/api/products",{
+        method: "GET",
+        credentials: "include", // Important: send cookies
+      });
+
+      if (response.status === 401 || response.status === 403) {
+        // Return a specific error string that we'll catch in the component
+        return rejectWithValue("Unauthorized");
+      }
+       if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.message || "Failed to fetch products");
+      }
       const data = await response.json();
       return data; // Pass the fetched data to Redux
     } catch (error) {
