@@ -18,6 +18,7 @@ import AddCategories from "./pages/admin/sidebar/categories/AddCategories";
 import Brands from "./pages/admin/sidebar/brands/Brands";
 import OrderDetails from "./pages/admin/sidebar/order/OrderDetails";
 import ProductTable from "./pages/admin/sidebar/Product/ProductTable";
+import UserProfile from "./pages/userProfile/UserProfile";
 
 function App() {
   return (
@@ -45,6 +46,7 @@ function App() {
           <Route path="orders" element={<Orders />} />
           <Route path="orders/detail" element={<OrderDetails />} />
           <Route path="users" element={<Users />} />
+          
           <Route path="settings" element={<Settings />} />
         </Route>
 
@@ -65,6 +67,7 @@ function App() {
             // </ProtectedRoute>
           }
         />
+        <Route path="user/profile" element={<UserProfile />} />
       </Routes>
     </BrowserRouter>
   );

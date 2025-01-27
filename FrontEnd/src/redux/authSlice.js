@@ -95,6 +95,34 @@ export const getUserProfile = createAsyncThunk(
   }
 );
 
+export const updateUserProfile = createAsyncThunk(
+  'auth/updateUserProfile',
+  async ({ userId, updatedData }, { rejectWithValue }) => {
+    try {
+      const response = await fetch(`/api/auth/users/profile/${userId}`, {
+        method: "PUT",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          username: updatedData.username, // not updatedData.name
+          email: updatedData.email,
+          phone: updatedData.phone,
+        }),
+      });
+      if (!response.ok) {
+        const errorMsg = await response.text();
+        throw new Error(errorMsg || "Update failed");
+      }
+
+      const data = await response.json(); // parse the JSON
+      return data; // updated user object
+    } catch (error) {
+      return rejectWithValue(error.message || "Something went wrong");
+    }
+  }
+);
+
 const initialState = {
   isAuthenticated: false,
   user: null,
@@ -174,6 +202,15 @@ const authSlice = createSlice({
         state.loading = false;
         state.error = action.payload;
         // If it's "Unauthorized", we might also do state.isAuthenticated = false;
+      })
+      .addCase(updateUserProfile.fulfilled, (state, action) => {
+       state.error = null;
+       state.user = action.payload; 
+       
+     })
+    .addCase(updateUserProfile.rejected, (state, action) => {
+        state.loading = false;
+        state.error = action.payload;
       });
   },
 });

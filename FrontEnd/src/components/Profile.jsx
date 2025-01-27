@@ -3,12 +3,15 @@ import { Avatar, Popover } from "antd";
 import { UserOutlined } from "@ant-design/icons";
 import { getUserProfile } from "../redux/authSlice";
 import { useDispatch, useSelector } from "react-redux";
+import { useNavigate } from "react-router-dom";
 
 const Profile = () => {
   const dispatch = useDispatch();
+  const navigate = useNavigate();
   const { user, loading, error } = useSelector((state) => state.auth);
   const [open, setOpen] = useState(false);
   const hide = () => {
+    navigate("/user/profile");
     setOpen(false);
   };
   const handleOpenChange = (newOpen) => {

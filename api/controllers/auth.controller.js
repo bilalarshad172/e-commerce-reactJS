@@ -153,3 +153,39 @@ export const getUserProfile = async (req, res) => {
     return res.status(500).json({ message: "Failed to get user profile" });
   }
 };
+
+export const updateUser = async (req, res) => {
+  try {
+    const { id } = req.params;
+
+    // For example, destructure needed fields from req.body
+    const {
+      username,
+      email,
+      phone,       // e.g. { fullPhoneNumber, isoCode }
+          // if you want to store a new photo URL
+      // ...any other fields
+    } = req.body;
+
+    // Find user and update
+    const updatedUser = await User.findByIdAndUpdate(
+      id,
+      {
+        username,
+        email,
+        phone,     // phone: { fullPhoneNumber, isoCode }
+       
+      },
+      { new: true } // returns updated user
+    );
+
+    if (!updatedUser) {
+      return res.status(404).json({ message: 'User not found' });
+    }
+
+    return res.status(200).json(updatedUser);
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: 'Server Error' });
+  }
+};
