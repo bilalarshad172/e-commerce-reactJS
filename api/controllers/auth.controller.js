@@ -163,7 +163,7 @@ export const updateUser = async (req, res) => {
       username,
       email,
       phone,       // e.g. { fullPhoneNumber, isoCode }
-          // if you want to store a new photo URL
+      photoURL,    // if you want to store a new photo URL
       // ...any other fields
     } = req.body;
 
@@ -174,7 +174,7 @@ export const updateUser = async (req, res) => {
         username,
         email,
         phone,     // phone: { fullPhoneNumber, isoCode }
-       
+        photoURL,
       },
       { new: true } // returns updated user
     );

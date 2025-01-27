@@ -4,6 +4,7 @@ import { getUser } from "../../redux/authSlice";
 import { Link, useNavigate } from "react-router-dom";
 import bgImage from "../../assets/background.jpg";
 import OAuth from "../../components/OAuth";
+import { message } from "antd";
 
 const login = () => {
   const [loginData, setLoginData] = useState({
@@ -43,8 +44,10 @@ const login = () => {
       if (getUser.fulfilled.match(resultAction)) {
         // Navigate to the products page on successful login
         navigate("/products");
+        message.success("Login successful!");
       } else {
         console.error("Login failed:", resultAction.payload || "Unknown error");
+        message.error("Login failed. Please try again.");
       }
     } catch (error) {
       console.error("An error occurred during login:", error.message);
@@ -109,13 +112,7 @@ const login = () => {
                 Sign up
               </Link>
             </div>
-            {/* Display error messages */}
-            {error && <p className="text-red-500">{error}</p>}
-
-            {/* Show success message if authenticated */}
-            {isAuthenticated && (
-              <p className="text-green-500">Login successful!</p>
-            )}
+           
           </div>
         </div>
         </form>

@@ -108,6 +108,7 @@ export const updateUserProfile = createAsyncThunk(
           username: updatedData.username, // not updatedData.name
           email: updatedData.email,
           phone: updatedData.phone,
+          photoURL: updatedData.photoURL,
         }),
       });
       if (!response.ok) {

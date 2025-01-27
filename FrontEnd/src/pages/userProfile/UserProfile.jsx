@@ -1,4 +1,4 @@
-import React, { useEffect,useState, useRef } from "react";
+import React, { useEffect, useState, useRef } from "react";
 import { Avatar } from "antd";
 import { UserOutlined } from "@ant-design/icons";
 import { getUserProfile, updateUserProfile } from "../../redux/authSlice";
@@ -12,6 +12,7 @@ const UserProfile = () => {
     username: user?.username || "",
     email: user?.email || "",
     phone: user?.phone || {},
+    photoURL: user?.photoURL || "",
   });
 
   console.log(user);
@@ -25,9 +26,46 @@ const UserProfile = () => {
       });
   }, [dispatch]);
 
+  const handleImageUpload = async (event) => {
+    const file = event.target.files[0]; // get the first file
+    if (!file) return;
+
+    // Create form data for the single file
+    const formData = new FormData();
+    formData.append("files", file);
+    // If your backend expects `file` instead of `files`, change accordingly
+
+    try {
+      const response = await fetch("/api/upload", {
+        method: "POST",
+        // no 'Content-Type' header — let fetch handle the boundary
+        body: formData,
+      });
+
+      if (!response.ok) {
+        throw new Error(`Server error: ${response.status}`);
+      }
+
+      // Parse the JSON
+      const data = await response.json();
+      // Suppose your server returns { urls: [ 'http://...' ] }
+      const { urls } = data;
+
+      if (urls && urls.length > 0) {
+        // Update the local state to reflect the new image URL
+        setProfileData((prev) => ({
+          ...prev,
+          photoURL: urls[0],
+        }));
+      }
+    } catch (error) {
+      console.error("Error uploading image:", error);
+    }
+  };
+
   const handleUpdate = (e) => {
-      e.preventDefault();
-      console.log("Updated profile =>", profileData);
+    e.preventDefault();
+    console.log("Updated profile =>", profileData);
     // // Build the data object to match your backend
     // const updatedData = {
     //   username,
@@ -36,7 +74,9 @@ const UserProfile = () => {
     //   // photoURL or whichever field you want
     // };
 
-    dispatch(updateUserProfile({ userId: user?._id, updatedData: profileData }));
+    dispatch(
+      updateUserProfile({ userId: user?._id, updatedData: profileData })
+    );
   };
   return (
     <div className="container w-1/2 mx-auto px-4">
@@ -45,16 +85,16 @@ const UserProfile = () => {
 
         <form onSubmit={handleUpdate}>
           <div className=" flex flex-col justify-center items-center gap-4 mt-5 ">
-            {user?.photoURL ? (
+            {profileData.photoURL ? (
               <img
-                src={user.photoURL}
-                alt="profile test"
+                src={profileData.photoURL}
+                alt="profile preview"
                 style={{
                   width: 100,
                   height: 100,
-                  borderRadius: "50%", // makes it fully rounded
-                  objectFit: "cover", // ensures the image scales nicely within the circle
-                  cursor: "pointer", // optional, if you want a pointer on hover
+                  borderRadius: "50%",
+                  objectFit: "cover",
+                  cursor: "pointer",
                 }}
                 onError={() => console.log("Image failed to load")}
               />
@@ -68,13 +108,13 @@ const UserProfile = () => {
                 icon={<UserOutlined />}
               />
             )}
+
             <input
               ref={fileRef}
               type="file"
               accept="image/*"
-              multiple
-              //   onChange={handleImageUpload}
               className="hidden"
+              onChange={handleImageUpload} // Make sure to actually call your handler
             />
             <button onClick={() => fileRef.current.click()} className="">
               Update Image

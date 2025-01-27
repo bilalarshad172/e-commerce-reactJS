@@ -1,6 +1,5 @@
 import React, { useState, useRef } from "react";
 import { Carousel } from "antd";
-import axios from "axios";
 
 const ProductImages = ({ uploadedImages, setUploadedImages }) => {
   const fileRef = useRef(null);
