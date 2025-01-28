@@ -96,7 +96,7 @@ export const getUserProfile = createAsyncThunk(
 );
 
 export const updateUserProfile = createAsyncThunk(
-  'auth/updateUserProfile',
+  "auth/updateUserProfile",
   async ({ userId, updatedData }, { rejectWithValue }) => {
     try {
       const response = await fetch(`/api/auth/users/profile/${userId}`, {
@@ -205,11 +205,11 @@ const authSlice = createSlice({
         // If it's "Unauthorized", we might also do state.isAuthenticated = false;
       })
       .addCase(updateUserProfile.fulfilled, (state, action) => {
-       state.error = null;
-       state.user = action.payload; 
-       
-     })
-    .addCase(updateUserProfile.rejected, (state, action) => {
+        state.error = null;
+        state.user = action.payload;
+        state.error = null;
+      })
+      .addCase(updateUserProfile.rejected, (state, action) => {
         state.loading = false;
         state.error = action.payload;
       });

@@ -19,6 +19,7 @@ import Brands from "./pages/admin/sidebar/brands/Brands";
 import OrderDetails from "./pages/admin/sidebar/order/OrderDetails";
 import ProductTable from "./pages/admin/sidebar/Product/ProductTable";
 import UserProfile from "./pages/userProfile/UserProfile";
+import CartView from "./pages/cart/CartView";
 
 function App() {
   return (
@@ -68,6 +69,7 @@ function App() {
           }
         />
         <Route path="user/profile" element={<UserProfile />} />
+        <Route path="products/cart" element={<CartView />} />
       </Routes>
     </BrowserRouter>
   );

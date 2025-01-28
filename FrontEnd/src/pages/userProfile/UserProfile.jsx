@@ -1,11 +1,13 @@
 import React, { useEffect, useState, useRef } from "react";
-import { Avatar } from "antd";
+import { Avatar, message } from "antd";
 import { UserOutlined } from "@ant-design/icons";
 import { getUserProfile, updateUserProfile } from "../../redux/authSlice";
 import { useDispatch, useSelector } from "react-redux";
 import PhoneInputField from "../../components/PhoneInput";
+import { useNavigate } from "react-router-dom";
 const UserProfile = () => {
   const dispatch = useDispatch();
+  const navigate = useNavigate();
   const fileRef = useRef(null);
   const { user } = useSelector((state) => state.auth);
   const [profileData, setProfileData] = useState({
@@ -66,17 +68,21 @@ const UserProfile = () => {
   const handleUpdate = (e) => {
     e.preventDefault();
     console.log("Updated profile =>", profileData);
-    // // Build the data object to match your backend
-    // const updatedData = {
-    //   username,
-    //   email,
-    //   phone,
-    //   // photoURL or whichever field you want
-    // };
-
-    dispatch(
-      updateUserProfile({ userId: user?._id, updatedData: profileData })
-    );
+    try {
+      dispatch(
+        updateUserProfile({ userId: user._id, updatedData: profileData })
+      )
+        .unwrap()
+        .then(() => {
+          message.success("Profile updated successfully");
+          navigate("/products");
+        })
+        .catch((err) => {
+          console.error(err);
+        });
+    } catch (error) {
+      console.error("Error updating profile:", error);
+    }
   };
   return (
     <div className="container w-1/2 mx-auto px-4">

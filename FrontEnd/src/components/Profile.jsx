@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { Avatar, Popover } from "antd";
 import { UserOutlined } from "@ant-design/icons";
-import { getUserProfile } from "../redux/authSlice";
+import { getUserProfile, logout } from "../redux/authSlice";
 import { useDispatch, useSelector } from "react-redux";
 import { useNavigate } from "react-router-dom";
 
@@ -12,6 +12,15 @@ const Profile = () => {
   const [open, setOpen] = useState(false);
   const hide = () => {
     navigate("/user/profile");
+    setOpen(false);
+  };
+
+  const handleSignout = () => {
+    dispatch(logout());
+    if (!error) {
+      // Navigate to login page on successful signup
+      navigate("/");
+    }
     setOpen(false);
   };
   const handleOpenChange = (newOpen) => {
@@ -31,7 +40,12 @@ const Profile = () => {
   return (
     <div>
       <Popover
-        content={<a onClick={hide}>Profile Setting</a>}
+        content={
+          <div className="flex flex-col">
+            <a onClick={hide}>Profile Setting</a>
+            <a onClick={handleSignout}>Logout</a>
+          </div>
+        }
         title={user?.username}
         trigger="click"
         style={{
