@@ -7,6 +7,7 @@ import { fetchProductById, resetCreateStatus } from "../../redux/productSlice";
 import DefaultImage from "../../assets/default.png";
 import { Spin, Tag } from "antd";
 import Card from "../../components/Card";
+import { AddtoCart } from "../../redux/cartSlice";
 
 const ProductView = () => {
   const [quantity, setQuantity] = useState(0);
@@ -15,6 +16,9 @@ const ProductView = () => {
   const { productForEdit, loadingSingleProduct, error } = useSelector(
     (state) => state.products
   );
+
+  const { user } = useSelector((state) => state.auth);
+  
 
   useEffect(() => {
     // Fetch product by ID
@@ -25,23 +29,48 @@ const ProductView = () => {
     };
   }, [dispatch, id]);
 
-  // console.log('ProductView render', { loading, productForEdit })
-
-  // console.log(productForEdit);
+  
   const imageSrc = productForEdit?.images?.[0] || DefaultImage;
 
   const handleImageError = (e) => {
     e.target.src = DefaultImage;
   };
 
-  const addQuantity = () => {
-    setQuantity(quantity + 1);
-  };
-  const removeQuantity = () => {
-    setQuantity(quantity - 1);
-  };
+  const handleAddToCart = () => {
+    if (!user) {
+      // If user is not logged in, show a warning or redirect
+      alert("Please log in or sign up to add to cart.");
+      return;
+    }
 
-  // console.log("ProductView loading state:", loading);
+    if (quantity <= 0) {
+      alert("Quantity must be at least 1");
+      return;
+    }
+
+    // Construct the cart data
+    const cartData = {
+      user: user._id, // the ID saved in Redux after login
+      cartItems: [
+        {
+          product: productForEdit._id,
+          quantity
+        }
+      ]
+    };
+
+    // Dispatch your Redux thunk to call the backend
+    dispatch(AddtoCart(cartData))
+      .unwrap()
+      .then(() => {
+        alert("Product added to cart successfully!");
+      })
+      .catch((err) => {
+        alert("Error adding product to cart: " + err);
+      });
+  };
+ 
+
   if (loadingSingleProduct)
     return (
       <div
@@ -81,7 +110,7 @@ const ProductView = () => {
               <h1 className="text-2xl    font-sans font-bold">
                 {productForEdit?.title}
               </h1>
-              <h2 className="text-xl font-bold">${productForEdit?.price}</h2>
+              <h2 className="text-xl font-bold">-/{productForEdit?.price}₨</h2>
             </div>
             <small className="block my-2">
               Brand: <Tag color="blue">{productForEdit?.brand?.title}</Tag>
@@ -100,19 +129,19 @@ const ProductView = () => {
               <div className="flex items-center gap-2">
                 <button
                   className="w-10 h-10 bg-black pb-1 text-xl text-white text-center rounded-full border flex items-center justify-center"
-                  onClick={removeQuantity}
+                  onClick={() => setQuantity((q) => Math.max(0, q - 1))}
                 >
                   -
                 </button>
                 <span>{quantity}</span>
                 <button
                   className="w-10 h-10 bg-black pb-1 text-xl text-white text-center rounded-full border flex items-center justify-center"
-                  onClick={addQuantity}
+                 onClick={() => setQuantity((q) => q + 1)}
                 >
                   +
                 </button>
               </div>
-              <button className="border rounded-xl w-1/3 py-1 bg-black text-white hover:opacity-80">
+              <button onClick={handleAddToCart} className="border rounded-xl w-1/3 py-1 bg-black text-white hover:opacity-80">
                 Add to cart
               </button>
             </div>

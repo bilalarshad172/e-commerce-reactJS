@@ -1,51 +1,79 @@
-import React from "react";
+import React, { useEffect } from "react";
 import { Table } from "antd";
 import { useDispatch, useSelector } from "react-redux";
+import { getCart } from "../../redux/cartSlice";
+import defaultImage from "../../assets/default.png";
 
 const CartView = () => {
-  const data = [
-    {
-      key: "1",
-      name: "Mike",
-      age: 32,
-      address: "10 Downing Street",
-    },
-    {
-      key: "2",
-      name: "John",
-      age: 42,
-      address: "10 Downing Street",
-    },
-  ];
+  const dispatch = useDispatch();
+  const { cartItems } = useSelector((state) => state.cart);
+  
+  useEffect(() => {
+    dispatch(getCart());
+  }, [dispatch]);
+
+  const dataSource = (cartItems?.cartItems || []).map((item, index) => ({
+    key: index.toString(),
+    ...item, // Spread item to include product and quantity
+  }));
   const columns = [
     {
+      title: "Image",
+      dataIndex: ["product", "images"],
+      key: "image",
+      render: (_, record) => {
+        const imageSrc = record.product?.images?.[0] || defaultImage;
+
+        const handleImageError = (e) => {
+          e.target.src = defaultImage;
+        };
+
+        return (
+          <img
+            src={imageSrc}
+            alt={record.product?.title || "Product Image"}
+            onError={handleImageError}
+            style={{
+              width: "40px",
+              height: "40px",
+              objectFit: "cover",
+              borderRadius: 5,
+            }}
+          />
+        );
+      },
+    },
+    {
       title: "Item",
-      dataIndex: "name",
-      key: "name",
+      dataIndex: ["product", "title"], // Access product title
+      key: "title",
     },
     {
       title: "Price",
-      dataIndex: "age",
-      key: "age",
+      dataIndex: ["product", "price"], // Access product price
+      key: "price",
+      render: (price) => `₨ ${price}`, // Format price
     },
     {
       title: "Quantity",
-      dataIndex: "address",
-      key: "address",
+      dataIndex: "quantity", // Access quantity
+      key: "quantity",
     },
     {
       title: "Total",
-      dataIndex: "address",
-      key: "address",
+      key: "total",
+      render: (_, record) =>
+        `₨ ${(record.product.price * record.quantity)}`, // Calculate total
     },
   ];
+
   return (
     <div className="container mx-auto px-4">
       <div className="border container mx-auto px-4 rounded-md shadow-md mt-5 text-center">
         <h3 className="text-2xl font-semibold mt-5">Your Cart items</h3>
 
         <div>
-          <Table dataSource={data} columns={columns} pagination={false} />
+          <Table dataSource={dataSource} columns={columns} pagination={false} />
         </div>
         <div className="flex justify-end my-5">
           <div className="w-1/4">

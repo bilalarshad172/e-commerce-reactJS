@@ -10,6 +10,7 @@ import BrandRoutes from "./routes/brands.route.js";
 import ProductRoutes from "./routes/product.route.js";
 import UploadRoutes from "./routes/imageUpload.routes.js";
 import Category from "./models/category.model.js";
+import CartRoutes from "./routes/cart.route.js";
 import { fileURLToPath } from "url";
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -50,6 +51,7 @@ app.use("/api/", CategoryRoutes);
 app.use("/api/", BrandRoutes);
 app.use("/api/", ProductRoutes);
 app.use('/api', UploadRoutes);
+app.use('/api', CartRoutes);
 
 
 
