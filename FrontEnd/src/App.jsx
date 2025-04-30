@@ -4,6 +4,7 @@ import Signup from "./pages/signup/Signup";
 import ProductListing from "./pages/products/ProductsListing";
 import ProductView from "./pages/products/ProductView";
 import ProtectedRoute from "./utils/ProtectedRoute";
+import AdminProtectedRoute from "./utils/AdminProtectedRoute";
 import AdminLogin from "./pages/admin/AdminLogin";
 import AdminLayout from "./pages/admin/dashboard/AdminLayout"; // Corrected import
 import AddProduct from "./pages/admin/sidebar/Product/AddProduct";
@@ -34,7 +35,14 @@ function App() {
 
         {/* Admin Routes */}
         <Route path="/admin101" element={<AdminLogin />} />
-        <Route path="/admin" element={<AdminLayout />}>
+        <Route
+          path="/admin"
+          element={
+            <AdminProtectedRoute>
+              <AdminLayout />
+            </AdminProtectedRoute>
+          }
+        >
           <Route index element={<Navigate to="/admin/dashboard" />} />
           <Route path="dashboard" element={<Dashboard/>} />
           <Route path="products/table" element={<ProductTable />} />
@@ -50,7 +58,6 @@ function App() {
           <Route path="orders" element={<Orders />} />
           <Route path="orders/:id" element={<OrderDetails />} />
           <Route path="users" element={<Users />} />
-
           <Route path="settings" element={<Settings />} />
         </Route>
 

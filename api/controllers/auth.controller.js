@@ -128,7 +128,13 @@ export const login = async (req, res, next) => {
         sameSite: "strict",
       })
       .status(200)
-      .json({ message: "Login successful!" });
+      .json({
+        message: "Login successful!",
+        role: user.role,
+        id: user._id,
+        username: user.username,
+        email: user.email
+      });
   } catch (error) {
     next(error); // Pass the error to error-handling middleware
   }
