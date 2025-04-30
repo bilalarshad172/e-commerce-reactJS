@@ -52,17 +52,18 @@ export const removeFromCart = createAsyncThunk(
   "cart/removeFromCart",
   async (cartData, { rejectWithValue }) => {
     try {
-      const response = await fetch("/api/cart/remove", {
-        method: "POST",
+      const response = await fetch("/api/cart", {
+        method: "DELETE",
         headers: {
           "Content-Type": "application/json",
         },
         body: JSON.stringify(cartData),
+        credentials: "include",
       });
 
       if (!response.ok) {
         const errorData = await response.json();
-        throw new Error(errorData.message || "Failed to remove from cart");
+        throw new Error(errorData.error || "Failed to remove from cart");
       }
 
       return await response.json();
@@ -76,17 +77,18 @@ export const updateCart = createAsyncThunk(
   "cart/updateCart",
   async (cartData, { rejectWithValue }) => {
     try {
-      const response = await fetch("/api/cart/update", {
-        method: "POST",
+      const response = await fetch("/api/cart", {
+        method: "PUT",
         headers: {
           "Content-Type": "application/json",
         },
         body: JSON.stringify(cartData),
+        credentials: "include",
       });
 
       if (!response.ok) {
         const errorData = await response.json();
-        throw new Error(errorData.message || "Failed to update cart");
+        throw new Error(errorData.error || "Failed to update cart");
       }
 
       return await response.json();

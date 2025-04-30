@@ -1,40 +1,127 @@
-import React from "react";
-import { NavLink } from "react-router-dom";
-import { FaShoppingCart, FaSignOutAlt } from "react-icons/fa";
+import React, { useState } from "react";
+import { NavLink, Link } from "react-router-dom";
+import { FaShoppingCart, FaSearch, FaHeart, FaBars } from "react-icons/fa";
 import Profile from "./Profile";
+import { useSelector } from "react-redux";
+import { Badge, Drawer, Menu, Input } from "antd";
+
+const { Search } = Input;
 
 const Header = () => {
-  
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const { cartItems } = useSelector((state) => state.cart);
+
+  // Calculate total items in cart
+  const cartItemCount = cartItems?.cartItems?.reduce(
+    (total, item) => total + item.quantity,
+    0
+  ) || 0;
+
+  // Categories for navigation
+  const categories = [
+    { name: "Home", path: "/products" },
+    { name: "Electronics", path: "/products?category=electronics" },
+    { name: "Clothing", path: "/products?category=clothing" },
+    { name: "Accessories", path: "/products?category=accessories" },
+    { name: "New Arrivals", path: "/products?sort=newest" },
+  ];
 
   return (
-    <div className="flex justify-between border-b py-3 mx-5">
-      <h1 className="text-3xl font-bold font-mono">Tanzayb</h1>
-      <input
-        className="border rounded px-1 w-1/3"
-        type="text"
-        name=""
-        id=""
-        placeholder="Search By name"
-      />
-      <div className="flex items-center gap-5">
-        
-        <NavLink to="/products/cart" className="flex items-center gap-2">
-          <FaShoppingCart className="text-2xl text-gray-700 cursor-pointer hover:text-blue-500 transition duration-300">
-            <span className="text-lg font-medium">Cart</span>
-          </FaShoppingCart>
-        </NavLink>
-        <div>
-        <Profile/>
-        </div>
-        {/* <div
-          className="flex items-center gap-1 cursor-pointer text-gray-700 hover:text-blue-500 transition duration-300"
-          onClick={handleSignout}
+    <header className="header">
+      <div className="container header__container">
+        {/* Logo */}
+        <Link to="/products" className="header__logo">
+          Tanzayb
+        </Link>
+
+        {/* Mobile Menu Button - only visible on small screens */}
+        <button
+          className="md:hidden text-gray-700 hover:text-black"
+          onClick={() => setMobileMenuOpen(true)}
         >
-          <FaSignOutAlt className="text-2xl" />
-          <span className="text-lg font-medium">Signout</span>
-        </div> */}
+          <FaBars size={24} />
+        </button>
+
+        {/* Desktop Navigation - hidden on small screens */}
+        <nav className="hidden md:flex items-center space-x-6">
+          {categories.map((category) => (
+            <NavLink
+              key={category.name}
+              to={category.path}
+              className={({ isActive }) =>
+                isActive
+                  ? "header__nav-link active"
+                  : "header__nav-link"
+              }
+            >
+              {category.name}
+            </NavLink>
+          ))}
+        </nav>
+
+        {/* Search Bar */}
+        <div className="header__search hidden md:block">
+          <Search
+            placeholder="Search products..."
+            allowClear
+            className="w-full"
+          />
+        </div>
+
+        {/* Action Icons */}
+        <div className="header__actions">
+          <NavLink to="/wishlist" className="header__nav-link hidden md:block">
+            <FaHeart size={20} />
+          </NavLink>
+
+          <NavLink to="/products/cart" className="header__nav-link relative">
+            <Badge count={cartItemCount} size="small" offset={[0, 0]}>
+              <FaShoppingCart size={20} />
+            </Badge>
+          </NavLink>
+
+          <div className="ml-4">
+            <Profile />
+          </div>
+        </div>
       </div>
-    </div>
+
+      {/* Mobile Menu Drawer */}
+      <Drawer
+        title="Menu"
+        placement="left"
+        onClose={() => setMobileMenuOpen(false)}
+        open={mobileMenuOpen}
+        width={280}
+      >
+        <div className="mb-4">
+          <Search placeholder="Search products..." allowClear />
+        </div>
+
+        <Menu mode="vertical">
+          {categories.map((category) => (
+            <Menu.Item key={category.name}>
+              <Link
+                to={category.path}
+                onClick={() => setMobileMenuOpen(false)}
+              >
+                {category.name}
+              </Link>
+            </Menu.Item>
+          ))}
+          <Menu.Divider />
+          <Menu.Item key="wishlist">
+            <Link
+              to="/wishlist"
+              onClick={() => setMobileMenuOpen(false)}
+              className="flex items-center"
+            >
+              <FaHeart className="mr-2" /> Wishlist
+            </Link>
+          </Menu.Item>
+        </Menu>
+      </Drawer>
+    </header>
   );
 };
 

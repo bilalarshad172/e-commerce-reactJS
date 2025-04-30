@@ -20,6 +20,8 @@ import OrderDetails from "./pages/admin/sidebar/order/OrderDetails";
 import ProductTable from "./pages/admin/sidebar/Product/ProductTable";
 import UserProfile from "./pages/userProfile/UserProfile";
 import CartView from "./pages/cart/CartView";
+import Checkout from "./pages/checkout/Checkout";
+import OrderConfirmation from "./pages/order/OrderConfirmation";
 
 function App() {
   return (
@@ -45,9 +47,9 @@ function App() {
           <Route path="brands" element={<Brands />} />
           <Route path="content" element={<ContentManagement />} />
           <Route path="orders" element={<Orders />} />
-          <Route path="orders/detail" element={<OrderDetails />} />
+          <Route path="orders/:id" element={<OrderDetails />} />
           <Route path="users" element={<Users />} />
-          
+
           <Route path="settings" element={<Settings />} />
         </Route>
 
@@ -70,6 +72,8 @@ function App() {
         />
         <Route path="user/profile" element={<UserProfile />} />
         <Route path="products/cart" element={<CartView />} />
+        <Route path="checkout" element={<Checkout />} />
+        <Route path="order/:id" element={<OrderConfirmation />} />
       </Routes>
     </BrowserRouter>
   );

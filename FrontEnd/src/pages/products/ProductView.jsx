@@ -1,56 +1,78 @@
 import React, { useEffect, useState } from "react";
 import Header from "../../components/Header";
 import { useDispatch, useSelector } from "react-redux";
-import { useParams } from "react-router-dom";
+import { useParams, useNavigate, Link } from "react-router-dom";
 import Footer from "../../components/Footer";
-import { fetchProductById, resetCreateStatus } from "../../redux/productSlice";
+import { fetchProductById, resetCreateStatus, fetchProducts } from "../../redux/productSlice";
 import DefaultImage from "../../assets/default.png";
-import { Spin, Tag } from "antd";
+import { Spin, Tag, Rate, InputNumber, Button, Tabs, message, Breadcrumb, Carousel } from "antd";
+import { ShoppingCartOutlined, HeartOutlined, ShareAltOutlined } from "@ant-design/icons";
 import Card from "../../components/Card";
 import { AddtoCart } from "../../redux/cartSlice";
 
+const { TabPane } = Tabs;
+
 const ProductView = () => {
-  const [quantity, setQuantity] = useState(0);
+  const [quantity, setQuantity] = useState(1);
+  const [activeImage, setActiveImage] = useState(0);
+  const [activeTab, setActiveTab] = useState("1");
   const { id } = useParams();
+  const navigate = useNavigate();
   const dispatch = useDispatch();
-  const { productForEdit, loadingSingleProduct, error } = useSelector(
+
+  const { productForEdit, loadingSingleProduct, error, products } = useSelector(
     (state) => state.products
   );
-
   const { user } = useSelector((state) => state.auth);
-  
 
   useEffect(() => {
     // Fetch product by ID
     dispatch(fetchProductById(id));
+
+    // Also fetch all products for related products section
+    dispatch(fetchProducts());
+
     // Cleanup: Clear selected product when component unmounts
     return () => {
       dispatch(resetCreateStatus());
     };
   }, [dispatch, id]);
 
-  
-  const imageSrc = productForEdit?.images?.[0] || DefaultImage;
+  // Get product images or use default
+  const productImages = productForEdit?.images?.length
+    ? productForEdit.images
+    : [DefaultImage];
 
   const handleImageError = (e) => {
     e.target.src = DefaultImage;
   };
 
+  // Handle thumbnail click
+  const handleThumbnailClick = (index) => {
+    setActiveImage(index);
+  };
+
+  // Handle quantity change
+  const handleQuantityChange = (value) => {
+    setQuantity(value);
+  };
+
+  // Handle add to cart
   const handleAddToCart = () => {
     if (!user) {
       // If user is not logged in, show a warning or redirect
-      alert("Please log in or sign up to add to cart.");
+      message.warning("Please log in or sign up to add to cart");
       return;
     }
 
     if (quantity <= 0) {
-      alert("Quantity must be at least 1");
+      message.error("Quantity must be at least 1");
       return;
     }
 
     // Construct the cart data
     const cartData = {
-      user: user._id, // the ID saved in Redux after login
+      user: user._id,
       cartItems: [
         {
           product: productForEdit._id,
@@ -63,105 +85,281 @@ const ProductView = () => {
     dispatch(AddtoCart(cartData))
       .unwrap()
       .then(() => {
-        alert("Product added to cart successfully!");
+        message.success(`${productForEdit.title} added to cart successfully!`);
       })
       .catch((err) => {
-        alert("Error adding product to cart: " + err);
+        message.error(`Error adding product to cart: ${err}`);
       });
   };
- 
+
+  // Get related products based on category
+  const getRelatedProducts = () => {
+    if (!productForEdit || !products) return [];
+
+    // Get current product categories
+    const currentCategories = productForEdit.category?.map(cat => cat._id) || [];
+
+    // Filter products that share at least one category with current product
+    return products
+      .filter(product =>
+        product._id !== productForEdit._id && // Exclude current product
+        product.category?.some(cat =>
+          currentCategories.includes(cat._id)
+        )
+      )
+      .slice(0, 4); // Limit to 4 related products
+  };
+
 
   if (loadingSingleProduct)
     return (
-      <div
-        style={{
-          display: "flex",
-          justifyContent: "center",
-          alignItems: "center",
-          height: "70vh", // Full viewport height for vertical centering
-        }}
-      >
-        <Spin size="large" />
-      </div>
+      <>
+        <Header />
+        <div className="container mx-auto px-4 py-16 flex justify-center">
+          <Spin size="large" />
+        </div>
+        <Footer />
+      </>
     );
-  if (error) return <p className="text-center mt-5">Error: {error}</p>;
+
+  if (error)
+    return (
+      <>
+        <Header />
+        <div className="container mx-auto px-4 py-8">
+          <div className="text-center py-12">
+            <h2 className="text-2xl font-semibold mb-4">Error Loading Product</h2>
+            <p className="text-red-500 mb-6">{error}</p>
+            <Button
+              onClick={() => navigate("/products")}
+              className="bg-black text-white px-6 py-2 h-auto"
+            >
+              Back to Products
+            </Button>
+          </div>
+        </div>
+        <Footer />
+      </>
+    );
+
   if (!productForEdit)
-    return <p className="text-center mt-5">Product not found.</p>;
+    return (
+      <>
+        <Header />
+        <div className="container mx-auto px-4 py-8">
+          <div className="text-center py-12">
+            <h2 className="text-2xl font-semibold mb-4">Product Not Found</h2>
+            <Button
+              onClick={() => navigate("/products")}
+              className="bg-black text-white px-6 py-2 h-auto"
+            >
+              Browse Products
+            </Button>
+          </div>
+        </div>
+        <Footer />
+      </>
+    );
+
   return (
     <>
       <Header />
 
-      <div className=" gap-20  mx-20 ">
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-42 justify-between items-center border mt-10 rounded-md shadow-md">
-          {/* Image Container */}
+      <div className="container mx-auto px-4 py-8">
+        {/* Breadcrumb Navigation */}
+        <Breadcrumb className="mb-6">
+          <Breadcrumb.Item>
+            <Link to="/products">Home</Link>
+          </Breadcrumb.Item>
+          {productForEdit.category && productForEdit.category.length > 0 && (
+            <Breadcrumb.Item>
+              <Link to={`/products?category=${productForEdit.category[0]._id}`}>
+                {productForEdit.category[0].title}
+              </Link>
+            </Breadcrumb.Item>
+          )}
+          <Breadcrumb.Item>{productForEdit.title}</Breadcrumb.Item>
+        </Breadcrumb>
 
-          <div className="w-full max-w-lg p-4 h-96   overflow-hidden">
-            <img
-              className="w-full h-full object-contain"
-              src={imageSrc}
-              onError={handleImageError}
-              alt={productForEdit?.title}
-            />
-          </div>
-
-          {/* Product Details */}
-          <div className=" min-h-96 bg-[#e0dfdf] rounded-md  max-h-full px-20 py-10">
-            <div className="flex justify-between items-center">
-              <h1 className="text-2xl    font-sans font-bold">
-                {productForEdit?.title}
-              </h1>
-              <h2 className="text-xl font-bold">-/{productForEdit?.price}₨</h2>
-            </div>
-            <small className="block my-2">
-              Brand: <Tag color="blue">{productForEdit?.brand?.title}</Tag>
-            </small>
-            <small className="block my-2">
-              Categories:{" "}
-              {productForEdit?.category?.map((cat) => (
-                <Tag key={cat._id} color="blue">
-                  {cat.title}
-                </Tag>
-              ))}
-            </small>
-
-            <div className="flex flex-col  justify-center mt-5 gap-2">
-              <h6 className="text-xl font-semibold"> Select Quantity</h6>
-              <div className="flex items-center gap-2">
-                <button
-                  className="w-10 h-10 bg-black pb-1 text-xl text-white text-center rounded-full border flex items-center justify-center"
-                  onClick={() => setQuantity((q) => Math.max(0, q - 1))}
-                >
-                  -
-                </button>
-                <span>{quantity}</span>
-                <button
-                  className="w-10 h-10 bg-black pb-1 text-xl text-white text-center rounded-full border flex items-center justify-center"
-                 onClick={() => setQuantity((q) => q + 1)}
-                >
-                  +
-                </button>
+        {/* Product Details Section */}
+        <div className="bg-white rounded-lg shadow-md overflow-hidden mb-12">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-8 p-6">
+            {/* Product Gallery */}
+            <div className="product-gallery">
+              {/* Thumbnails */}
+              <div className="product-gallery__thumbnails">
+                {productImages.map((image, index) => (
+                  <div
+                    key={index}
+                    className={`product-gallery__thumbnail ${index === activeImage ? 'active' : ''}`}
+                    onClick={() => handleThumbnailClick(index)}
+                  >
+                    <img
+                      src={image}
+                      alt={`${productForEdit.title} - Thumbnail ${index + 1}`}
+                      onError={handleImageError}
+                    />
+                  </div>
+                ))}
               </div>
-              <button onClick={handleAddToCart} className="border rounded-xl w-1/3 py-1 bg-black text-white hover:opacity-80">
-                Add to cart
-              </button>
+
+              {/* Main Image */}
+              <div className="product-gallery__main">
+                <img
+                  src={productImages[activeImage]}
+                  alt={productForEdit.title}
+                  onError={handleImageError}
+                />
+              </div>
+            </div>
+
+            {/* Product Info */}
+            <div className="product-info">
+              <h1 className="product-info__title">{productForEdit.title}</h1>
+
+              <div className="flex items-center mb-4">
+                <Rate
+                  disabled
+                  defaultValue={productForEdit.rating || 4}
+                  allowHalf
+                />
+                <span className="text-gray-500 ml-2">
+                  ({productForEdit.rating || 4})
+                </span>
+              </div>
+
+              <div className="product-info__price">
+                ₨ {productForEdit.price}
+              </div>
+
+              <div className="product-info__meta">
+                <div className="product-info__meta-item">
+                  <span className="product-info__meta-label">Brand</span>
+                  <span className="product-info__meta-value">
+                    <Tag color="blue">{productForEdit.brand?.title}</Tag>
+                  </span>
+                </div>
+
+                <div className="product-info__meta-item">
+                  <span className="product-info__meta-label">Categories</span>
+                  <span className="product-info__meta-value">
+                    {productForEdit.category?.map((cat) => (
+                      <Tag key={cat._id} color="blue" className="mr-1">
+                        {cat.title}
+                      </Tag>
+                    ))}
+                  </span>
+                </div>
+
+                <div className="product-info__meta-item">
+                  <span className="product-info__meta-label">Availability</span>
+                  <span className="product-info__meta-value">
+                    <Tag color="green">In Stock</Tag>
+                  </span>
+                </div>
+              </div>
+
+              <div className="product-info__description">
+                {productForEdit.description.substring(0, 200)}
+                {productForEdit.description.length > 200 && '...'}
+              </div>
+
+              <div className="flex items-center gap-4 mb-6">
+                <div className="w-32">
+                  <InputNumber
+                    min={1}
+                    max={10}
+                    value={quantity}
+                    onChange={handleQuantityChange}
+                    className="w-full"
+                  />
+                </div>
+
+                <Button
+                  type="primary"
+                  size="large"
+                  icon={<ShoppingCartOutlined />}
+                  onClick={handleAddToCart}
+                  className="bg-black text-white hover:bg-gray-800 border-none"
+                >
+                  Add to Cart
+                </Button>
+
+                <Button
+                  type="default"
+                  size="large"
+                  icon={<HeartOutlined />}
+                  onClick={() => message.info("Wishlist feature coming soon!")}
+                >
+                  Wishlist
+                </Button>
+              </div>
+
+              <div className="flex items-center gap-2">
+                <Button
+                  type="text"
+                  icon={<ShareAltOutlined />}
+                  onClick={() => message.info("Share feature coming soon!")}
+                >
+                  Share
+                </Button>
+              </div>
             </div>
           </div>
+
+          {/* Product Tabs */}
+          <Tabs
+            defaultActiveKey="1"
+            activeKey={activeTab}
+            onChange={setActiveTab}
+            className="px-6 pb-6"
+          >
+            <TabPane tab="Description" key="1">
+              <div className="py-4">
+                <p className="whitespace-pre-line">{productForEdit.description}</p>
+              </div>
+            </TabPane>
+            <TabPane tab="Specifications" key="2">
+              <div className="py-4">
+                <table className="w-full border-collapse">
+                  <tbody>
+                    <tr className="border-b">
+                      <td className="py-2 px-4 font-medium bg-gray-50">Brand</td>
+                      <td className="py-2 px-4">{productForEdit.brand?.title}</td>
+                    </tr>
+                    <tr className="border-b">
+                      <td className="py-2 px-4 font-medium bg-gray-50">Categories</td>
+                      <td className="py-2 px-4">
+                        {productForEdit.category?.map(cat => cat.title).join(', ')}
+                      </td>
+                    </tr>
+                    <tr className="border-b">
+                      <td className="py-2 px-4 font-medium bg-gray-50">In Stock</td>
+                      <td className="py-2 px-4">Yes</td>
+                    </tr>
+                  </tbody>
+                </table>
+              </div>
+            </TabPane>
+            <TabPane tab="Reviews" key="3">
+              <div className="py-4 text-center">
+                <p className="text-gray-500">No reviews yet. Be the first to review this product!</p>
+              </div>
+            </TabPane>
+          </Tabs>
         </div>
 
-        <div className="mt-10">
-          <div className="px-2 mt-2">
-            <h4 className="text-xl font-semibold"> Product Description</h4>
-            <hr className="my-2" />
-            <p className="py-1">{productForEdit?.description}</p>
-          </div>
-        </div>
-        <div className="mt-10">
-          <h3 className="text-center text-2xl my-3">Related Products</h3>
-          <div className=" ">
+        {/* Related Products Section */}
+        <div className="mb-12">
+          <h2 className="text-2xl font-bold mb-6">Related Products</h2>
+          {getRelatedProducts().length > 0 ? (
             <Card />
-          </div>
+          ) : (
+            <p className="text-center text-gray-500 py-8">No related products found</p>
+          )}
         </div>
       </div>
+
       <Footer />
     </>
   );

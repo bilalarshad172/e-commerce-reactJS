@@ -1,7 +1,30 @@
-import React, { useState } from "react";
-import { Table, Button, Space, Menu, Checkbox, Dropdown } from "antd";
-import { EyeOutlined } from "@ant-design/icons";
+import React, { useState, useEffect } from "react";
+import { Table, Button, Space, Menu, Checkbox, Dropdown, Tag, Spin, message } from "antd";
+import { EyeOutlined, SearchOutlined, ReloadOutlined } from "@ant-design/icons";
 import { NavLink } from "react-router-dom";
+import { useDispatch, useSelector } from "react-redux";
+import { getAllOrders, updateOrderStatus } from "../../../../redux/orderSlice";
+
+const getStatusColor = (status) => {
+  switch (status) {
+    case "Pending":
+      return "orange";
+    case "Processing":
+      return "blue";
+    case "Shipped":
+      return "purple";
+    case "Delivered":
+      return "green";
+    case "Cancelled":
+      return "red";
+    default:
+      return "default";
+  }
+};
+
+const getPaymentStatusColor = (isPaid) => {
+  return isPaid ? "green" : "red";
+};
 
 const initialColumns = [
   {
@@ -27,47 +50,60 @@ const initialColumns = [
   },
   {
     title: "Order ID",
-    dataIndex: "Order_id",
+    dataIndex: "_id",
     key: "Order_id",
+    render: (id) => <span className="font-medium">{id.substring(0, 8)}...</span>,
   },
   {
     title: "Date",
-    dataIndex: "date",
+    dataIndex: "createdAt",
     key: "date",
+    render: (date) => new Date(date).toLocaleDateString(),
   },
   {
     title: "Customer",
-    dataIndex: "customer",
+    dataIndex: ["user", "username"],
     key: "customer",
   },
   {
     title: "Payment Status",
-    dataIndex: "payment_status",
+    dataIndex: "isPaid",
     key: "payment_status",
+    render: (isPaid) => (
+      <Tag color={getPaymentStatusColor(isPaid)}>
+        {isPaid ? "Paid" : "Not Paid"}
+      </Tag>
+    ),
   },
   {
-    title: "Fullfillment Status",
-    dataIndex: "fullfillment_status",
-    key: "fullfillment_status",
+    title: "Order Status",
+    dataIndex: "status",
+    key: "status",
+    render: (status) => (
+      <Tag color={getStatusColor(status)}>
+        {status}
+      </Tag>
+    ),
   },
   {
     title: "Payment Method",
-    dataIndex: "payment_method",
+    dataIndex: "paymentMethod",
     key: "payment_method",
   },
   {
     title: "Total",
-    dataIndex: "total",
+    dataIndex: "totalPrice",
     key: "total",
+    render: (price) => `₨ ${price}`,
   },
   {
     title: "Actions",
     key: "action",
     align: "right",
-    render: (text, record) => (
+    render: (_, record) => (
       <Space>
         <NavLink
-          to="/admin/orders/detail"
+          to={`/admin/orders/${record._id}`}
           style={{
             color: "#1890ff",
             textDecoration: "none",
@@ -83,69 +119,19 @@ const initialColumns = [
   },
 ];
 
-const data = [
-  {
-    key: "1",
-    checkbox: false,
-    Order_id: "ORD-001",
-    date: "2024-01-01",
-    customer: "John Doe",
-    payment_status: "Paid",
-    fullfillment_status: "Fulfilled",
-    payment_method: "Credit Card",
-    total: "$100.00",
-  },
-  {
-    key: "2",
-    checkbox: false,
-    Order_id: "ORD-002",
-    date: "2024-01-02",
-    customer: "Jane Smith",
-    payment_status: "Pending",
-    fullfillment_status: "Pending",
-    payment_method: "PayPal",
-    total: "$200.00",
-  },
-  {
-    key: "3",
-    checkbox: false,
-    Order_id: "ORD-003",
-    date: "2024-01-03",
-    customer: "Alice Johnson",
-    payment_status: "Failed",
-    fullfillment_status: "Not Fulfilled",
-    payment_method: "Debit Card",
-    total: "$150.00",
-  },
-  {
-    key: "4",
-    checkbox: false,
-    Order_id: "ORD-004",
-    date: "2024-01-04",
-    customer: "Bob Williams",
-    payment_status: "Paid",
-    fullfillment_status: "Shipped",
-    payment_method: "Apple Pay",
-    total: "$250.00",
-  },
-  {
-    key: "5",
-    checkbox: false,
-    Order_id: "ORD-005",
-    date: "2024-01-05",
-    customer: "Charlie Brown",
-    payment_status: "Refunded",
-    fullfillment_status: "Cancelled",
-    payment_method: "Google Pay",
-    total: "$75.00",
-  },
-];
-
 const Orders = () => {
+  const dispatch = useDispatch();
+  const { orders, loading, error } = useSelector((state) => state.orders);
+
   const [columns, setColumns] = useState(initialColumns);
   const [visibleColumns, setVisibleColumns] = useState(
     initialColumns.map((col) => col.key)
   );
+  const [searchText, setSearchText] = useState("");
+
+  useEffect(() => {
+    dispatch(getAllOrders());
+  }, [dispatch]);
 
   const handleColumnToggle = (key) => {
     setVisibleColumns((prev) =>
@@ -174,25 +160,88 @@ const Orders = () => {
     </Menu>
   );
 
+  // Filter orders based on search text
+  const filteredOrders = orders?.filter((order) => {
+    if (!searchText) return true;
+
+    const searchLower = searchText.toLowerCase();
+    const orderId = order._id.toLowerCase();
+    const customerName = order.user?.username?.toLowerCase() || "";
+
+    return (
+      orderId.includes(searchLower) ||
+      customerName.includes(searchLower)
+    );
+  });
+
+  // Handle search input change
+  const handleSearchChange = (e) => {
+    setSearchText(e.target.value);
+  };
+
+  // Handle refresh button click
+  const handleRefresh = () => {
+    dispatch(getAllOrders());
+  };
+
+  if (error) {
+    message.error(error);
+  }
+
   return (
-    <div className="border rounded-md shadow-md mt-5">
-      <h3 className="text-2xl font-semibold ml-5">Orders</h3>
-      <div className="flex justify-between items-center mt-5 mx-5">
-        <div>
-          <input
-            type="text"
-            className="border p-1 rounded-md"
-            placeholder="Search Users"
-          />
-        </div>
-        <div>
-          <Dropdown overlay={menu} trigger={["click"]}>
-            <Button>Columns</Button>
-          </Dropdown>
-        </div>
+    <div className="bg-white rounded-lg shadow-md mt-5 overflow-hidden">
+      <div className="p-6 border-b">
+        <h1 className="text-2xl font-bold">Orders</h1>
+        <p className="text-gray-600">Manage customer orders</p>
       </div>
-      <div className="mt-5">
-        <Table size="small" columns={filteredColumns} dataSource={data} />
+
+      <div className="p-6">
+        <div className="flex flex-col md:flex-row justify-between items-center mb-6 gap-4">
+          <div className="w-full md:w-auto relative">
+            <input
+              type="text"
+              className="border rounded-md py-2 px-4 pr-10 w-full md:w-64"
+              placeholder="Search orders..."
+              value={searchText}
+              onChange={handleSearchChange}
+            />
+            <SearchOutlined className="absolute right-3 top-3 text-gray-400" />
+          </div>
+
+          <div className="flex gap-2">
+            <Button
+              icon={<ReloadOutlined />}
+              onClick={handleRefresh}
+              loading={loading}
+              className="border-black text-black hover:bg-gray-100"
+            >
+              Refresh
+            </Button>
+            <Dropdown overlay={menu} trigger={["click"]}>
+              <Button className="border-black text-black hover:bg-gray-100">
+                Columns
+              </Button>
+            </Dropdown>
+          </div>
+        </div>
+
+        {loading ? (
+          <div className="flex justify-center py-8">
+            <Spin size="large" />
+          </div>
+        ) : (
+          <Table
+            rowKey="_id"
+            columns={filteredColumns}
+            dataSource={filteredOrders || []}
+            pagination={{
+              pageSize: 10,
+              showSizeChanger: true,
+              pageSizeOptions: ['10', '20', '50'],
+            }}
+            className="border rounded-lg overflow-hidden"
+          />
+        )}
       </div>
     </div>
   );
