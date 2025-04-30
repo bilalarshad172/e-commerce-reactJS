@@ -22,6 +22,7 @@ import UserProfile from "./pages/userProfile/UserProfile";
 import CartView from "./pages/cart/CartView";
 import Checkout from "./pages/checkout/Checkout";
 import OrderConfirmation from "./pages/order/OrderConfirmation";
+import OrderHistory from "./pages/orders/OrderHistory";
 
 function App() {
   return (
@@ -74,6 +75,14 @@ function App() {
         <Route path="products/cart" element={<CartView />} />
         <Route path="checkout" element={<Checkout />} />
         <Route path="order/:id" element={<OrderConfirmation />} />
+        <Route
+          path="my-orders"
+          element={
+            <ProtectedRoute>
+              <OrderHistory />
+            </ProtectedRoute>
+          }
+        />
       </Routes>
     </BrowserRouter>
   );

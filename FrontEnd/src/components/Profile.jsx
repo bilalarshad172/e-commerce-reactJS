@@ -41,9 +41,13 @@ const Profile = () => {
     <div>
       <Popover
         content={
-          <div className="flex flex-col">
-            <a onClick={hide}>Profile Setting</a>
-            <a onClick={handleSignout}>Logout</a>
+          <div className="flex flex-col space-y-2">
+            <a onClick={hide} className="hover:text-black cursor-pointer">Profile Setting</a>
+            <a onClick={() => {
+              navigate("/my-orders");
+              setOpen(false);
+            }} className="hover:text-black cursor-pointer">My Orders</a>
+            <a onClick={handleSignout} className="hover:text-black cursor-pointer">Logout</a>
           </div>
         }
         title={user?.username}
@@ -80,7 +84,7 @@ const Profile = () => {
           style={{
             backgroundColor: "#87d068",
                       cursor: "pointer",
-            
+
           }}
           icon={<UserOutlined />}
         /> */}
