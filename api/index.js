@@ -12,6 +12,7 @@ import UploadRoutes from "./routes/imageUpload.routes.js";
 import Category from "./models/category.model.js";
 import CartRoutes from "./routes/cart.route.js";
 import OrderRoutes from "./routes/order.route.js";
+import { startScheduledTasks } from "./utils/scheduledTasks.js";
 import { fileURLToPath } from "url";
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -31,6 +32,9 @@ mongoose
     // Sync the indexes
     await Category.syncIndexes();
     console.log("Indexes synced successfully");
+
+    // Start scheduled tasks
+    startScheduledTasks();
   })
   .catch((err) => {
     console.log(err);

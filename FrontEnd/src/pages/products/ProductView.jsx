@@ -5,7 +5,7 @@ import { useParams, useNavigate, Link } from "react-router-dom";
 import Footer from "../../components/Footer";
 import { fetchProductById, resetCreateStatus, fetchProducts } from "../../redux/productSlice";
 import DefaultImage from "../../assets/default.png";
-import { Spin, Tag, Rate, InputNumber, Button, Tabs, message, Breadcrumb, Carousel } from "antd";
+import { Spin, Tag, Rate, InputNumber, Button, Tabs, message, Breadcrumb } from "antd";
 import { ShoppingCartOutlined, HeartOutlined, ShareAltOutlined } from "@ant-design/icons";
 import Card from "../../components/Card";
 import { AddtoCart } from "../../redux/cartSlice";
@@ -70,6 +70,18 @@ const ProductView = () => {
       return;
     }
 
+    // Check if product is in stock
+    if (productForEdit.countInStock <= 0) {
+      message.error(`${productForEdit.title} is out of stock`);
+      return;
+    }
+
+    // Check if requested quantity is available
+    if (quantity > productForEdit.countInStock) {
+      message.error(`Only ${productForEdit.countInStock} units available in stock`);
+      return;
+    }
+
     // Construct the cart data
     const cartData = {
       user: user._id,
@@ -88,7 +100,13 @@ const ProductView = () => {
         message.success(`${productForEdit.title} added to cart successfully!`);
       })
       .catch((err) => {
-        message.error(`Error adding product to cart: ${err}`);
+        // Check if the error is due to inventory issues
+        if (err.response && err.response.data && err.response.data.error === "Not enough inventory available") {
+          const { availableQuantity, productTitle } = err.response.data;
+          message.error(`Only ${availableQuantity} units of ${productTitle} available`);
+        } else {
+          message.error(`Error adding product to cart: ${err}`);
+        }
       });
   };
 
@@ -254,8 +272,51 @@ const ProductView = () => {
                 <div className="product-info__meta-item">
                   <span className="product-info__meta-label">Availability</span>
                   <span className="product-info__meta-value">
-                    <Tag color="green">In Stock</Tag>
+                    {productForEdit.countInStock > 0 ? (
+                      productForEdit.countInStock <= 5 ? (
+                        <Tag color="orange">Low Stock ({productForEdit.countInStock} left)</Tag>
+                      ) : (
+                        <Tag color="green">In Stock ({productForEdit.countInStock} available)</Tag>
+                      )
+                    ) : (
+                      <Tag color="red">Out of Stock</Tag>
+                    )}
                   </span>
+                </div>
+              </div>
+
+              {/* Stock Quantity Display */}
+              <div className="mb-6 mt-2">
+                <div className="flex items-center">
+                  <span className="text-gray-700 font-medium mr-2">Quantity in Stock:</span>
+                  <span className="text-lg font-bold">
+                    {productForEdit.countInStock}
+                  </span>
+                </div>
+
+                {/* Stock Level Indicator */}
+                <div className="mt-2">
+                  <div className="w-full bg-gray-200 rounded-full h-2.5">
+                    <div
+                      className={`h-2.5 rounded-full ${
+                        productForEdit.countInStock === 0
+                          ? 'bg-red-500'
+                          : productForEdit.countInStock <= 5
+                            ? 'bg-orange-500'
+                            : productForEdit.countInStock <= 20
+                              ? 'bg-yellow-500'
+                              : 'bg-green-500'
+                      }`}
+                      style={{
+                        width: `${Math.min(100, (productForEdit.countInStock / 50) * 100)}%`
+                      }}
+                    ></div>
+                  </div>
+                  <div className="flex justify-between text-xs text-gray-500 mt-1">
+                    <span>0</span>
+                    <span>25</span>
+                    <span>50+</span>
+                  </div>
                 </div>
               </div>
 
@@ -268,12 +329,18 @@ const ProductView = () => {
                 <div className="w-32">
                   <InputNumber
                     min={1}
-                    max={10}
+                    max={productForEdit.countInStock}
                     value={quantity}
                     onChange={handleQuantityChange}
                     className="w-full"
+                    disabled={productForEdit.countInStock <= 0}
                   />
                 </div>
+                {productForEdit.countInStock > 0 && (
+                  <div className="text-xs text-gray-500">
+                    Maximum: {productForEdit.countInStock} units
+                  </div>
+                )}
 
                 <Button
                   type="primary"
@@ -281,8 +348,9 @@ const ProductView = () => {
                   icon={<ShoppingCartOutlined />}
                   onClick={handleAddToCart}
                   className="bg-black text-white hover:bg-gray-800 border-none"
+                  disabled={productForEdit.countInStock <= 0}
                 >
-                  Add to Cart
+                  {productForEdit.countInStock > 0 ? "Add to Cart" : "Out of Stock"}
                 </Button>
 
                 <Button
@@ -334,8 +402,37 @@ const ProductView = () => {
                       </td>
                     </tr>
                     <tr className="border-b">
-                      <td className="py-2 px-4 font-medium bg-gray-50">In Stock</td>
-                      <td className="py-2 px-4">Yes</td>
+                      <td className="py-2 px-4 font-medium bg-gray-50">Availability</td>
+                      <td className="py-2 px-4">
+                        {productForEdit.countInStock > 0 ? (
+                          <span className="flex items-center">
+                            <span className={`inline-block w-3 h-3 rounded-full mr-2 ${
+                              productForEdit.countInStock <= 5
+                                ? 'bg-orange-500'
+                                : 'bg-green-500'
+                            }`}></span>
+                            In Stock
+                          </span>
+                        ) : (
+                          <span className="flex items-center">
+                            <span className="inline-block w-3 h-3 rounded-full mr-2 bg-red-500"></span>
+                            Out of Stock
+                          </span>
+                        )}
+                      </td>
+                    </tr>
+                    <tr className="border-b">
+                      <td className="py-2 px-4 font-medium bg-gray-50">Quantity Available</td>
+                      <td className="py-2 px-4">{productForEdit.countInStock} units</td>
+                    </tr>
+                    <tr className="border-b">
+                      <td className="py-2 px-4 font-medium bg-gray-50">Stock Status</td>
+                      <td className="py-2 px-4">
+                        {productForEdit.countInStock === 0 && "Out of Stock"}
+                        {productForEdit.countInStock > 0 && productForEdit.countInStock <= 5 && "Low Stock"}
+                        {productForEdit.countInStock > 5 && productForEdit.countInStock <= 20 && "Medium Stock"}
+                        {productForEdit.countInStock > 20 && "High Stock"}
+                      </td>
                     </tr>
                   </tbody>
                 </table>

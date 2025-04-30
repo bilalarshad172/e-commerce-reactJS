@@ -14,10 +14,10 @@ const Checkout = () => {
   const [currentStep, setCurrentStep] = useState(0);
   const [shippingData, setShippingData] = useState({});
   const [paymentMethod, setPaymentMethod] = useState("Cash on Delivery");
-  
+
   const dispatch = useDispatch();
   const navigate = useNavigate();
-  
+
   const { cartItems, status: cartStatus } = useSelector((state) => state.cart);
   const { user } = useSelector((state) => state.auth);
   const { loading, error, success, orderDetails } = useSelector((state) => state.orders);
@@ -27,7 +27,7 @@ const Checkout = () => {
     (acc, item) => acc + item.product.price * item.quantity,
     0
   ) || 0;
-  
+
   const shippingPrice = itemsPrice > 1000 ? 0 : 100; // Free shipping for orders over 1000
   const taxPrice = Math.round(0.15 * itemsPrice); // 15% tax
   const totalPrice = itemsPrice + shippingPrice + taxPrice;
@@ -35,6 +35,11 @@ const Checkout = () => {
   useEffect(() => {
     dispatch(getCart());
   }, [dispatch]);
+
+  // Check if any items in the cart have inventory issues
+  const hasInventoryIssues = cartItems?.cartItems?.some(
+    item => !item.hasEnoughStock || !item.inStock
+  );
 
   useEffect(() => {
     // If order creation was successful, navigate to order confirmation
@@ -203,7 +208,7 @@ const Checkout = () => {
         return (
           <div className="bg-white p-6 rounded-lg shadow-md">
             <h2 className="text-2xl font-semibold mb-4">Review Your Order</h2>
-            
+
             <div className="mb-6">
               <h3 className="text-xl font-medium mb-2">Shipping Information</h3>
               <div className="bg-gray-50 p-4 rounded">
@@ -214,14 +219,14 @@ const Checkout = () => {
                 <p><span className="font-medium">Phone:</span> {shippingData.phone}</p>
               </div>
             </div>
-            
+
             <div className="mb-6">
               <h3 className="text-xl font-medium mb-2">Payment Method</h3>
               <div className="bg-gray-50 p-4 rounded">
                 <p>{paymentMethod}</p>
               </div>
             </div>
-            
+
             <div className="mb-6">
               <h3 className="text-xl font-medium mb-2">Order Items</h3>
               <div className="bg-gray-50 p-4 rounded">
@@ -236,6 +241,14 @@ const Checkout = () => {
                       <div>
                         <p className="font-medium">{item.product.title}</p>
                         <p>Qty: {item.quantity}</p>
+                        {!item.inStock && (
+                          <p className="text-red-500 text-xs">Out of stock</p>
+                        )}
+                        {item.inStock && !item.hasEnoughStock && (
+                          <p className="text-red-500 text-xs">
+                            Only {item.availableQuantity} available
+                          </p>
+                        )}
                       </div>
                     </div>
                     <p>₨ {item.product.price * item.quantity}</p>
@@ -243,7 +256,7 @@ const Checkout = () => {
                 ))}
               </div>
             </div>
-            
+
             <div className="mb-6">
               <h3 className="text-xl font-medium mb-2">Order Summary</h3>
               <div className="bg-gray-50 p-4 rounded">
@@ -265,7 +278,7 @@ const Checkout = () => {
                 </div>
               </div>
             </div>
-            
+
             <div className="flex gap-4">
               <Button
                 onClick={() => setCurrentStep(1)}
@@ -276,12 +289,19 @@ const Checkout = () => {
               <Button
                 onClick={handlePlaceOrder}
                 loading={loading}
+                disabled={hasInventoryIssues}
                 className="bg-black text-white px-6 py-2 h-auto"
+                title={hasInventoryIssues ? "Please update your cart to resolve inventory issues" : ""}
               >
-                Place Order
+                {hasInventoryIssues ? "Inventory Issues" : "Place Order"}
               </Button>
+              {hasInventoryIssues && (
+                <div className="mt-2 text-red-500 text-sm">
+                  Some items in your cart have inventory issues. Please update your cart before placing the order.
+                </div>
+              )}
             </div>
-            
+
             {error && (
               <div className="mt-4 text-red-500">
                 Error: {error}
@@ -325,12 +345,12 @@ const Checkout = () => {
             <Step title="Review" />
           </Steps>
         </div>
-        
+
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
           <div className="lg:col-span-2">
             {renderStep()}
           </div>
-          
+
           <div className="lg:col-span-1">
             <div className="bg-white p-6 rounded-lg shadow-md">
               <h2 className="text-xl font-semibold mb-4">Order Summary</h2>

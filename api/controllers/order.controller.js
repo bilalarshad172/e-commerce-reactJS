@@ -1,6 +1,8 @@
 import Order from "../models/order.model.js";
 import Cart from "../models/cart.model.js";
 import User from "../models/user.model.js";
+import Product from "../models/product.model.js";
+import { completeReservations } from "../services/inventory.service.js";
 
 // Create a new order
 export const createOrder = async (req, res) => {
@@ -26,6 +28,27 @@ export const createOrder = async (req, res) => {
       return res.status(400).json({ message: "No order items" });
     }
 
+    // Verify inventory availability one last time before creating order
+    for (const item of orderItems) {
+      const product = await Product.findById(item.product);
+      if (!product) {
+        return res.status(400).json({
+          message: "Product not found",
+          productId: item.product
+        });
+      }
+
+      if (product.countInStock < item.quantity) {
+        return res.status(400).json({
+          message: "Not enough inventory available",
+          productId: item.product,
+          productTitle: product.title,
+          requestedQuantity: item.quantity,
+          availableQuantity: product.countInStock
+        });
+      }
+    }
+
     // Create the order
     const order = new Order({
       user: userId,
@@ -40,12 +63,23 @@ export const createOrder = async (req, res) => {
 
     const createdOrder = await order.save();
 
+    // Update inventory and complete reservations
+    await completeReservations(userId, orderItems);
+
     // Clear the user's cart after successful order creation
     await Cart.findOneAndDelete({ user: userId });
 
+    // Populate product details for the response
+    const populatedOrder = await Order.findById(createdOrder._id)
+      .populate("user", "username email")
+      .populate({
+        path: "orderItems.product",
+        select: "title price images",
+      });
+
     res.status(201).json({
       message: "Order created successfully",
-      order: createdOrder,
+      order: populatedOrder,
     });
   } catch (error) {
     console.error("Error creating order:", error);

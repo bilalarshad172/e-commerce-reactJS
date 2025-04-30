@@ -51,9 +51,20 @@ const CartView = () => {
       .unwrap()
       .then(() => {
         message.success("Cart updated");
+        // Refresh cart data to update availability status
+        dispatch(getCart());
       })
       .catch((error) => {
-        message.error(`Failed to update cart: ${error}`);
+        // Check if the error is due to inventory issues
+        if (error.response && error.response.data && error.response.data.error === "Not enough inventory available") {
+          const { availableQuantity, productTitle } = error.response.data;
+          message.error(`Only ${availableQuantity} units of ${productTitle} available`);
+
+          // Refresh cart to get updated inventory
+          dispatch(getCart());
+        } else {
+          message.error(`Failed to update cart: ${error}`);
+        }
       });
   };
 
@@ -88,6 +99,19 @@ const CartView = () => {
       title: "Item",
       dataIndex: ["product", "title"], // Access product title
       key: "title",
+      render: (title, record) => (
+        <div>
+          <div>{title}</div>
+          {record.hasEnoughStock === false && (
+            <div className="text-red-500 text-xs mt-1">
+              Only {record.availableQuantity} available
+            </div>
+          )}
+          {record.inStock === false && (
+            <div className="text-red-500 text-xs mt-1">Out of stock</div>
+          )}
+        </div>
+      ),
     },
     {
       title: "Price",
@@ -104,13 +128,14 @@ const CartView = () => {
           <Button
             icon={<MinusOutlined />}
             onClick={() => handleUpdateQuantity(record.product._id, quantity - 1)}
-            disabled={quantity <= 1}
+            disabled={quantity <= 1 || !record.inStock}
             className="border-gray-300"
           />
           <span className="mx-2">{quantity}</span>
           <Button
             icon={<PlusOutlined />}
             onClick={() => handleUpdateQuantity(record.product._id, quantity + 1)}
+            disabled={!record.hasEnoughStock || !record.inStock}
             className="border-gray-300"
           />
         </div>

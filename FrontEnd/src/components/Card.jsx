@@ -90,6 +90,12 @@ const Card = ({ categoryFilter, limit }) => {
       return;
     }
 
+    // Check if product is in stock
+    if (product.countInStock <= 0) {
+      message.error(`${product.title} is out of stock`);
+      return;
+    }
+
     const cartData = {
       user: user._id,
       cartItems: [
@@ -106,7 +112,13 @@ const Card = ({ categoryFilter, limit }) => {
         message.success(`${product.title} added to cart`);
       })
       .catch((err) => {
-        message.error(`Failed to add to cart: ${err}`);
+        // Check if the error is due to inventory issues
+        if (err.response && err.response.data && err.response.data.error === "Not enough inventory available") {
+          const { availableQuantity, productTitle } = err.response.data;
+          message.error(`Only ${availableQuantity} units of ${productTitle} available`);
+        } else {
+          message.error(`Failed to add to cart: ${err}`);
+        }
       });
   };
 
@@ -217,6 +229,21 @@ const Card = ({ categoryFilter, limit }) => {
               {/* Product Price */}
               <div className="product-card__price">
                 ₨ {product.price}
+              </div>
+
+              {/* Inventory Status */}
+              <div className="mt-2">
+                {product.countInStock > 0 ? (
+                  product.countInStock <= 5 ? (
+                    <span className="text-xs text-orange-500">
+                      Only {product.countInStock} left in stock
+                    </span>
+                  ) : (
+                    <span className="text-xs text-green-600">In Stock</span>
+                  )
+                ) : (
+                  <span className="text-xs text-red-500">Out of Stock</span>
+                )}
               </div>
             </div>
           </div>
