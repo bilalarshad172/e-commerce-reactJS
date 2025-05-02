@@ -138,7 +138,10 @@ const AddProduct = () => {
         .unwrap() // if you're using RTK, unwrap helps with error handling
         .then(() => {
           message.success("Product updated successfully");
-          navigate("/admin/products/table");
+          // Use setTimeout to ensure the navigation happens after the state updates
+          setTimeout(() => {
+            navigate("/admin/products/table", { replace: true });
+          }, 500);
         })
         .catch((err) => {
           message.error("Update error: " + (err.message || "Unknown error"));
@@ -150,7 +153,10 @@ const AddProduct = () => {
         .unwrap()
         .then(() => {
           message.success("Product created successfully");
-          navigate("/admin/products/table");
+          // Use setTimeout to ensure the navigation happens after the state updates
+          setTimeout(() => {
+            navigate("/admin/products/table", { replace: true });
+          }, 500);
         })
         .catch((err) => {
           message.error("Create error: " + (err.message || "Unknown error"));

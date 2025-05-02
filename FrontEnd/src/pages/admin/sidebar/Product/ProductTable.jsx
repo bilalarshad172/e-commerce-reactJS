@@ -333,10 +333,10 @@ const ProductTable = () => {
   const [searchTerm, setSearchTerm] = useState('');
 
   // Filtered products based on search
-  const filteredProducts = products.filter(product =>
-    product.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    (product.brand?.title || '').toLowerCase().includes(searchTerm.toLowerCase())
-  );
+  const filteredProducts = products ? products.filter(product =>
+    (product.title ? product.title.toLowerCase().includes(searchTerm.toLowerCase()) : false) ||
+    (product.brand?.title ? product.brand.title.toLowerCase().includes(searchTerm.toLowerCase()) : false)
+  ) : [];
 
   return (
     <div className="container mx-auto px-4">
