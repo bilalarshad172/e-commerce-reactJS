@@ -6,7 +6,16 @@ import {
   updateBrand,
 } from "../../../../redux/brandsSlice";
 import { useNavigate, useParams } from "react-router-dom";
-import { Button, Form, Input, message, Spin } from "antd";
+import { Button, Form, Input, message, Spin, Typography, Card, Alert } from "antd";
+import { NavLink } from "react-router-dom";
+import {
+  SaveOutlined,
+  CloseOutlined,
+  TagOutlined,
+  ArrowLeftOutlined
+} from "@ant-design/icons";
+
+const { Title, Text } = Typography;
 
 const AddBrands = () => {
   const { id } = useParams(); // Get brand ID from the route
@@ -65,48 +74,93 @@ const AddBrands = () => {
   }
 
   return (
-    <div className="border rounded-md shadow-md mt-5 p-5">
-      <h2 className="text-xl font-semibold mb-3">
-        {id ? "Edit Brand" : "Add Brand"}
-      </h2>
-      <Form
-        form={form}
-        layout="vertical"
-        onFinish={handleSubmit}
-        initialValues={{
-          title: "", // Default value for the form
-        }}
-      >
-        <Form.Item
-          label="Brand Name"
-          name="title"
-          rules={[
-            { required: true, message: "Please enter the brand name" },
-            { min: 2, message: "Name must be at least 2 characters" },
-          ]}
-        >
-          <Input
-            placeholder="Enter brand name"
-            defaultValue={id && brand ? brand.title : ""}
-          />
-        </Form.Item>
-        <button
-          className="border rounded-md px-2 py-1 mt-3 border-black text-black hover:bg-black hover:text-white"
-        
-          type="default"
-          htmlType="submit"
-          loading={loading || fetchLoading}
-        >
-          {id ? "Update Brand" : "Add Brand"}
-        </button>
-        <button
-           className="border rounded-md px-2 py-1 mt-3 border-black text-black hover:bg-black hover:text-white ml-2"
-          type="default"
-          onClick={() => navigate("/admin/brands")}
-        >
-          Cancel
-        </button>
-      </Form>
+    <div className="container mx-auto px-4">
+      <div className="border rounded-lg shadow-lg mt-5 overflow-hidden transition-all duration-300 hover:shadow-xl">
+        <div className="bg-white p-6">
+          {/* Header with back button */}
+          <div className="flex items-center mb-6">
+            <NavLink
+              to="/admin/brands"
+              className="mr-4 text-gray-600 hover:text-black transition-colors"
+            >
+              <ArrowLeftOutlined style={{ fontSize: '16px' }} />
+            </NavLink>
+            <div>
+              <Title level={3} className="m-0">
+                {id ? "Edit Brand" : "Add New Brand"}
+              </Title>
+              <Text type="secondary">
+                {id
+                  ? "Update existing brand details"
+                  : "Create a new brand for your products"}
+              </Text>
+            </div>
+          </div>
+
+          {/* Form Card */}
+          <Card className="shadow-sm mb-6">
+            <Form
+              form={form}
+              layout="vertical"
+              onFinish={handleSubmit}
+              initialValues={{
+                title: "", // Default value for the form
+              }}
+              className="max-w-2xl"
+            >
+              <div className="mb-4">
+                <TagOutlined className="text-gray-400 mr-2" />
+                <Text strong>Brand Information</Text>
+              </div>
+
+              <Form.Item
+                label="Brand Name"
+                name="title"
+                rules={[
+                  { required: true, message: "Please enter the brand name" },
+                  { min: 2, message: "Name must be at least 2 characters" },
+                ]}
+              >
+                <Input
+                  placeholder="Enter brand name"
+                  className="rounded-md"
+                  size="large"
+                  defaultValue={id && brand ? brand.title : ""}
+                />
+              </Form.Item>
+
+              <Alert
+                message="Brand Usage Information"
+                description="Brands can be assigned to products to help customers filter and find products from their favorite manufacturers."
+                type="info"
+                showIcon
+                className="mb-6"
+              />
+
+              <div className="flex gap-3 mt-6">
+                <Button
+                  type="primary"
+                  htmlType="submit"
+                  icon={<SaveOutlined />}
+                  loading={loading || fetchLoading}
+                  className="bg-black hover:bg-gray-800 border-black"
+                  size="large"
+                >
+                  {id ? "Update Brand" : "Create Brand"}
+                </Button>
+                <NavLink to="/admin/brands">
+                  <Button
+                    icon={<CloseOutlined />}
+                    size="large"
+                  >
+                    Cancel
+                  </Button>
+                </NavLink>
+              </div>
+            </Form>
+          </Card>
+        </div>
+      </div>
     </div>
   );
 };
