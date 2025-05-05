@@ -1,9 +1,18 @@
 import React, { useState, useEffect } from "react";
-import { Table, Button, Space, Menu, Checkbox, Dropdown, Tag, Spin, message } from "antd";
-import { EyeOutlined, SearchOutlined, ReloadOutlined } from "@ant-design/icons";
+import { Table, Button, Space, Menu, Checkbox, Dropdown, Tag, Spin, message, Typography, Card, Statistic, Row, Col } from "antd";
+import {
+  EyeOutlined,
+  SearchOutlined,
+  ReloadOutlined,
+  ShoppingOutlined,
+  DollarOutlined,
+  ClockCircleOutlined,
+  CheckCircleOutlined,
+  FilterOutlined
+} from "@ant-design/icons";
 import { NavLink } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
-import { getAllOrders, updateOrderStatus } from "../../../../redux/orderSlice";
+import { getAllOrders } from "../../../../redux/orderSlice";
 
 const getStatusColor = (status) => {
   switch (status) {
@@ -37,10 +46,10 @@ const initialColumns = [
     ),
     dataIndex: "checkbox",
     key: "checkbox",
-    onCell: (record) => ({
+    onCell: () => ({
       onClick: (e) => e.stopPropagation(), // Prevent row click when clicking on this cell
     }),
-    render: (text, record) => (
+    render: () => (
       <input
         type="checkbox"
         name="product_id"
@@ -119,19 +128,48 @@ const initialColumns = [
   },
 ];
 
+const { Title, Text } = Typography;
+
 const Orders = () => {
   const dispatch = useDispatch();
   const { orders, loading, error } = useSelector((state) => state.orders);
 
-  const [columns, setColumns] = useState(initialColumns);
+  const [columns] = useState(initialColumns);
   const [visibleColumns, setVisibleColumns] = useState(
     initialColumns.map((col) => col.key)
   );
   const [searchText, setSearchText] = useState("");
 
+  // Order statistics
+  const [orderStats, setOrderStats] = useState({
+    totalOrders: 0,
+    pendingOrders: 0,
+    deliveredOrders: 0,
+    totalRevenue: 0
+  });
+
   useEffect(() => {
     dispatch(getAllOrders());
   }, [dispatch]);
+
+  // Calculate order statistics when orders change
+  useEffect(() => {
+    if (orders && orders.length) {
+      const totalOrders = orders.length;
+      const pendingOrders = orders.filter(order => order.status === "Pending").length;
+      const deliveredOrders = orders.filter(order => order.status === "Delivered").length;
+
+      // Calculate total revenue from all orders
+      const totalRevenue = orders.reduce((sum, order) => sum + (order.totalPrice || 0), 0);
+
+      setOrderStats({
+        totalOrders,
+        pendingOrders,
+        deliveredOrders,
+        totalRevenue
+      });
+    }
+  }, [orders]);
 
   const handleColumnToggle = (key) => {
     setVisibleColumns((prev) =>
@@ -189,59 +227,114 @@ const Orders = () => {
   }
 
   return (
-    <div className="bg-white rounded-lg shadow-md mt-5 overflow-hidden">
-      <div className="p-6 border-b">
-        <h1 className="text-2xl font-bold">Orders</h1>
-        <p className="text-gray-600">Manage customer orders</p>
-      </div>
-
-      <div className="p-6">
-        <div className="flex flex-col md:flex-row justify-between items-center mb-6 gap-4">
-          <div className="w-full md:w-auto relative">
-            <input
-              type="text"
-              className="border rounded-md py-2 px-4 pr-10 w-full md:w-64"
-              placeholder="Search orders..."
-              value={searchText}
-              onChange={handleSearchChange}
-            />
-            <SearchOutlined className="absolute right-3 top-3 text-gray-400" />
+    <div className="container mx-auto px-4">
+      <div className="border rounded-lg shadow-lg mt-5 overflow-hidden transition-all duration-300 hover:shadow-xl">
+        <div className="bg-white p-6">
+          {/* Header Section */}
+          <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-6">
+            <div>
+              <Title level={3} className="m-0">Orders</Title>
+              <Text type="secondary">Manage and track customer orders</Text>
+            </div>
           </div>
 
-          <div className="flex gap-2">
-            <Button
-              icon={<ReloadOutlined />}
-              onClick={handleRefresh}
-              loading={loading}
-              className="border-black text-black hover:bg-gray-100"
-            >
-              Refresh
-            </Button>
-            <Dropdown overlay={menu} trigger={["click"]}>
-              <Button className="border-black text-black hover:bg-gray-100">
-                Columns
+          {/* Stats Cards */}
+          <Row gutter={[16, 16]} className="mb-6">
+            <Col xs={24} sm={12} lg={6}>
+              <Card hoverable className="h-full shadow-sm hover:shadow-md transition-shadow">
+                <Statistic
+                  title={<span className="text-gray-600 font-medium">Total Orders</span>}
+                  value={orderStats.totalOrders}
+                  valueStyle={{ color: '#1890ff' }}
+                  prefix={<ShoppingOutlined />}
+                />
+              </Card>
+            </Col>
+            <Col xs={24} sm={12} lg={6}>
+              <Card hoverable className="h-full shadow-sm hover:shadow-md transition-shadow">
+                <Statistic
+                  title={<span className="text-gray-600 font-medium">Pending Orders</span>}
+                  value={orderStats.pendingOrders}
+                  valueStyle={{ color: '#fa8c16' }}
+                  prefix={<ClockCircleOutlined />}
+                />
+              </Card>
+            </Col>
+            <Col xs={24} sm={12} lg={6}>
+              <Card hoverable className="h-full shadow-sm hover:shadow-md transition-shadow">
+                <Statistic
+                  title={<span className="text-gray-600 font-medium">Delivered Orders</span>}
+                  value={orderStats.deliveredOrders}
+                  valueStyle={{ color: '#52c41a' }}
+                  prefix={<CheckCircleOutlined />}
+                />
+              </Card>
+            </Col>
+            <Col xs={24} sm={12} lg={6}>
+              <Card hoverable className="h-full shadow-sm hover:shadow-md transition-shadow">
+                <Statistic
+                  title={<span className="text-gray-600 font-medium">Total Revenue</span>}
+                  value={orderStats.totalRevenue}
+                  valueStyle={{ color: '#722ed1' }}
+                  prefix={<DollarOutlined />}
+                  suffix="₨"
+                />
+              </Card>
+            </Col>
+          </Row>
+
+          {/* Search and Filters */}
+          <div className="flex flex-col md:flex-row justify-between items-center mb-6 gap-4">
+            <div className="w-full md:w-auto relative">
+              <input
+                type="text"
+                className="border rounded-md py-2 px-4 pr-10 w-full md:w-64"
+                placeholder="Search orders..."
+                value={searchText}
+                onChange={handleSearchChange}
+              />
+              <SearchOutlined className="absolute right-3 top-3 text-gray-400" />
+            </div>
+
+            <div className="flex gap-2">
+              <Button
+                icon={<ReloadOutlined />}
+                onClick={handleRefresh}
+                loading={loading}
+                className="border-black text-black hover:bg-gray-100"
+              >
+                Refresh
               </Button>
-            </Dropdown>
+              <Dropdown menu={{ items: menu.items }} trigger={["click"]}>
+                <Button className="border-black text-black hover:bg-gray-100">
+                  <FilterOutlined className="mr-1" /> Columns
+                </Button>
+              </Dropdown>
+            </div>
+          </div>
+
+          {/* Table Section */}
+          <div className="overflow-hidden border border-gray-200 rounded-lg">
+            {loading ? (
+              <div className="flex justify-center py-8">
+                <Spin size="large" />
+              </div>
+            ) : (
+              <Table
+                rowKey="_id"
+                columns={filteredColumns}
+                dataSource={filteredOrders || []}
+                pagination={{
+                  pageSize: 10,
+                  showSizeChanger: true,
+                  pageSizeOptions: ['10', '20', '50'],
+                  showTotal: (total, range) => `${range[0]}-${range[1]} of ${total} items`,
+                }}
+                className="orders-table"
+              />
+            )}
           </div>
         </div>
-
-        {loading ? (
-          <div className="flex justify-center py-8">
-            <Spin size="large" />
-          </div>
-        ) : (
-          <Table
-            rowKey="_id"
-            columns={filteredColumns}
-            dataSource={filteredOrders || []}
-            pagination={{
-              pageSize: 10,
-              showSizeChanger: true,
-              pageSizeOptions: ['10', '20', '50'],
-            }}
-            className="border rounded-lg overflow-hidden"
-          />
-        )}
       </div>
     </div>
   );
