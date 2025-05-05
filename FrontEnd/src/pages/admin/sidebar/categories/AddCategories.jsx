@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { useSelector, useDispatch } from "react-redux";
-import { TreeSelect, message, Button, Form, Input, Spin } from "antd";
+import { TreeSelect, message, Button, Form, Input, Spin, Typography, Card, Alert } from "antd";
 import { useNavigate, useParams } from "react-router-dom";
 import {
   fetchCategories,
@@ -9,6 +9,14 @@ import {
   fetchCategoryById,
 } from "../../../../redux/categorySlice";
 import { NavLink } from "react-router-dom";
+import {
+  SaveOutlined,
+  CloseOutlined,
+  AppstoreOutlined,
+  ArrowLeftOutlined
+} from "@ant-design/icons";
+
+const { Title, Text } = Typography;
 
 const AddCategories = () => {
   const dispatch = useDispatch();
@@ -87,56 +95,110 @@ const AddCategories = () => {
   }
 
   return (
-    <div className="border rounded-md shadow-md mt-5 p-5">
-      <h2 className="text-xl font-semibold mb-3">
-        {id ? "Edit Category" : "Add Category"}
-      </h2>
+    <div className="container mx-auto px-4">
+      <div className="border rounded-lg shadow-lg mt-5 overflow-hidden transition-all duration-300 hover:shadow-xl">
+        <div className="bg-white p-6">
+          {/* Header with back button */}
+          <div className="flex items-center mb-6">
+            <NavLink
+              to="/admin/categories"
+              className="mr-4 text-gray-600 hover:text-black transition-colors"
+            >
+              <ArrowLeftOutlined style={{ fontSize: '16px' }} />
+            </NavLink>
+            <div>
+              <Title level={3} className="m-0">
+                {id ? "Edit Category" : "Add New Category"}
+              </Title>
+              <Text type="secondary">
+                {id
+                  ? "Update existing category details"
+                  : "Create a new category for your products"}
+              </Text>
+            </div>
+          </div>
 
-      <Form
-        form={form}
-        layout="vertical"
-        onFinish={handleSubmit}
-        initialValues={{
-          title: "",
-          parent: null,
-        }}
-      >
-        <Form.Item
-          label="Category Name"
-          name="title"
-          rules={[
-            { required: true, message: "Please enter the category name" },
-          ]}
-        >
-          <Input placeholder="Enter category name" />
-        </Form.Item>
+          {/* Form Card */}
+          <Card className="shadow-sm mb-6">
+            <Form
+              form={form}
+              layout="vertical"
+              onFinish={handleSubmit}
+              initialValues={{
+                title: "",
+                parent: null,
+              }}
+              className="max-w-2xl"
+            >
+              <div className="mb-4">
+                <AppstoreOutlined className="text-gray-400 mr-2" />
+                <Text strong>Category Information</Text>
+              </div>
 
-        <Form.Item label="Parent Category" name="parent">
-          <TreeSelect
-            showSearch
-            placeholder="Select parent category"
-            allowClear
-            treeDefaultExpandAll
-            treeData={treeData}
-          />
-        </Form.Item>
-        <div className="flex gap-2 items-center my-3">
-           <button
-            className="border rounded-md px-2 py-1 mt-3 border-black text-black hover:bg-black hover:text-white"
-            type="submit"
-            loading={loading || fetchLoading}
-          >
-            {id ? "Update Category" : "Add Category"}
-          </button>
-          <NavLink
-            to={"/admin/categories"}
-            className="border rounded-md px-2 py-1 mt-3 border-black text-black hover:bg-black hover:text-white"
-          >
-            Cancel
-          </NavLink>
-         
+              <Form.Item
+                label="Category Name"
+                name="title"
+                rules={[
+                  { required: true, message: "Please enter the category name" },
+                  { min: 2, message: "Name must be at least 2 characters" },
+                ]}
+              >
+                <Input
+                  placeholder="Enter category name"
+                  className="rounded-md"
+                  size="large"
+                />
+              </Form.Item>
+
+              <Form.Item
+                label="Parent Category (Optional)"
+                name="parent"
+                extra="Leave empty to create a top-level category"
+              >
+                <TreeSelect
+                  showSearch
+                  placeholder="Select parent category"
+                  allowClear
+                  treeDefaultExpandAll
+                  treeData={treeData}
+                  className="rounded-md"
+                  size="large"
+                  dropdownStyle={{ maxHeight: 400, overflow: 'auto' }}
+                />
+              </Form.Item>
+
+              <Alert
+                message="Category Structure Information"
+                description="Categories can be nested to create a hierarchy. A category without a parent will be a top-level category."
+                type="info"
+                showIcon
+                className="mb-6"
+              />
+
+              <div className="flex gap-3 mt-6">
+                <Button
+                  type="primary"
+                  htmlType="submit"
+                  icon={<SaveOutlined />}
+                  loading={loading || fetchLoading}
+                  className="bg-black hover:bg-gray-800 border-black"
+                  size="large"
+                >
+                  {id ? "Update Category" : "Create Category"}
+                </Button>
+                <NavLink to="/admin/categories">
+                  <Button
+                    icon={<CloseOutlined />}
+                    size="large"
+                  >
+                    Cancel
+                  </Button>
+                </NavLink>
+              </div>
+            </Form>
+          </Card>
         </div>
-      </Form>
+      </div>
     </div>
   );
 };
