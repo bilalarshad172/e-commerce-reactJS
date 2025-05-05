@@ -42,18 +42,29 @@ const UserProfile = () => {
   // Update form and profileData when user data changes
   useEffect(() => {
     if (user) {
+      // Log the user data to see what's coming from the server
+      console.log("User data from server:", user);
+
+      // Ensure phone data is properly structured
+      const phoneData = user.phone && (user.phone.fullPhoneNumber || user.phone.isoCode)
+        ? user.phone
+        : { fullPhoneNumber: "", isoCode: "" };
+
       setProfileData({
         username: user.username || "",
         email: user.email || "",
-        phone: user.phone || {},
+        phone: phoneData,
         photoURL: user.photoURL || "",
       });
 
       form.setFieldsValue({
         username: user.username || "",
         email: user.email || "",
-        phone: user.phone || {},
+        phone: phoneData,
       });
+
+      // Log the phone data being set
+      console.log("Phone data being set:", phoneData);
     }
   }, [user, form]);
 
@@ -98,26 +109,39 @@ const UserProfile = () => {
   };
 
   const handleUpdate = (values) => {
-    // Make sure phone data is properly structured
+    // Make sure phone data is properly structured with required fields
+    const phoneData = values.phone || {};
+
+    // Ensure phone object has the correct structure
+    const formattedPhoneData = {
+      fullPhoneNumber: phoneData.fullPhoneNumber || "",
+      isoCode: phoneData.isoCode || ""
+    };
+
+    // Only include phone data if it's actually filled in
+    const hasPhoneData = formattedPhoneData.fullPhoneNumber && formattedPhoneData.isoCode;
+
     const updatedData = {
       ...values,
       photoURL: profileData.photoURL,
-      phone: values.phone || {}
+      phone: hasPhoneData ? formattedPhoneData : null
     };
 
-    console.log("Updated profile =>", updatedData);
+    console.log("Updated profile data being sent =>", updatedData);
 
     try {
       dispatch(
         updateUserProfile({ userId: user._id, updatedData: updatedData })
       )
         .unwrap()
-        .then(() => {
+        .then((response) => {
+          console.log("Profile update response:", response);
           message.success("Profile updated successfully");
-          // Stay on the profile page instead of navigating away
+          // Refresh user data
+          dispatch(getUserProfile());
         })
         .catch((err) => {
-          console.error(err);
+          console.error("Profile update error:", err);
           message.error("Failed to update profile. Please try again.");
         });
     } catch (error) {
@@ -264,11 +288,22 @@ const UserProfile = () => {
                         <Form.Item
                           label={<span className="font-medium">Phone Number</span>}
                           name="phone"
+                          help="Enter your phone number with country code"
                         >
                           <PhoneInputField
                             phoneData={form.getFieldValue('phone')}
                             setPhoneData={(phoneObj) => {
-                              form.setFieldsValue({ phone: phoneObj });
+                              // Log the phone object to see what's being set
+                              console.log("Phone object from input:", phoneObj);
+
+                              // Ensure the phone object has the correct structure
+                              const formattedPhone = {
+                                fullPhoneNumber: phoneObj.fullPhoneNumber || "",
+                                isoCode: phoneObj.isoCode || ""
+                              };
+
+                              // Update the form with the formatted phone data
+                              form.setFieldsValue({ phone: formattedPhone });
                             }}
                           />
                         </Form.Item>
