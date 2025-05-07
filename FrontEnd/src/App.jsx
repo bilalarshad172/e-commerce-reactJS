@@ -3,6 +3,7 @@ import Login from "./pages/login/Login";
 import Signup from "./pages/signup/Signup";
 import ProductListing from "./pages/products/ProductsListing";
 import ProductView from "./pages/products/ProductView";
+import SearchResults from "./pages/products/SearchResults";
 import ProtectedRoute from "./utils/ProtectedRoute";
 import AdminProtectedRoute from "./utils/AdminProtectedRoute";
 import AdminLogin from "./pages/admin/AdminLogin";
@@ -77,6 +78,10 @@ function App() {
               <ProductView />
             // </ProtectedRoute>
           }
+        />
+        <Route
+          path="/products/search"
+          element={<SearchResults />}
         />
         <Route path="user/profile" element={<UserProfile />} />
         <Route path="products/cart" element={<CartView />} />

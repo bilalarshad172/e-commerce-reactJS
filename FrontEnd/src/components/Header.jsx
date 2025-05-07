@@ -1,15 +1,25 @@
-import React, { useState } from "react";
-import { NavLink, Link } from "react-router-dom";
+import React, { useState, useEffect } from "react";
+import { NavLink, Link, useNavigate } from "react-router-dom";
 import { FaShoppingCart, FaSearch, FaHeart, FaBars } from "react-icons/fa";
 import Profile from "./Profile";
-import { useSelector } from "react-redux";
-import { Badge, Drawer, Menu, Input } from "antd";
+import { useSelector, useDispatch } from "react-redux";
+import { Badge, Drawer, Menu, Input, message } from "antd";
+import { fetchCategories } from "../redux/categorySlice";
 
 const { Search } = Input;
 
 const Header = () => {
+  const navigate = useNavigate();
+  const dispatch = useDispatch();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const [searchTerm, setSearchTerm] = useState("");
   const { cartItems } = useSelector((state) => state.cart);
+  const { categories: allCategories } = useSelector((state) => state.categories);
+
+  // Fetch categories on component mount
+  useEffect(() => {
+    dispatch(fetchCategories());
+  }, [dispatch]);
 
   // Calculate total items in cart
   const cartItemCount = cartItems?.cartItems?.reduce(
@@ -17,13 +27,33 @@ const Header = () => {
     0
   ) || 0;
 
+  // Handle search
+  const handleSearch = (value) => {
+    if (!value || value.trim() === "") {
+      message.info("Please enter a search term");
+      return;
+    }
+
+    navigate(`/products/search?query=${encodeURIComponent(value)}`);
+    setSearchTerm("");
+  };
+
+  // Get clothing and accessories categories if they exist
+  const clothingCategory = allCategories?.find(cat =>
+    cat.title.toLowerCase() === "clothing" ||
+    cat.title.toLowerCase().includes("cloth")
+  );
+
+  const accessoriesCategory = allCategories?.find(cat =>
+    cat.title.toLowerCase() === "accessories" ||
+    cat.title.toLowerCase().includes("accessor")
+  );
+
   // Categories for navigation
   const categories = [
-    { name: "Home", path: "/products" },
-    { name: "Electronics", path: "/products?category=electronics" },
-    { name: "Clothing", path: "/products?category=clothing" },
-    { name: "Accessories", path: "/products?category=accessories" },
-    { name: "New Arrivals", path: "/products?sort=newest" },
+    ...(clothingCategory ? [{ name: "Clothing", path: `/products/search?category=${clothingCategory._id}` }] : []),
+    ...(accessoriesCategory ? [{ name: "Accessories", path: `/products/search?category=${accessoriesCategory._id}` }] : []),
+    { name: "New Arrivals", path: "/products/search?sort=newest" },
   ];
 
   return (
@@ -44,6 +74,19 @@ const Header = () => {
 
         {/* Desktop Navigation - hidden on small screens */}
         <nav className="hidden md:flex items-center space-x-6">
+          {/* Home link */}
+          <NavLink
+            to="/products"
+            className={({ isActive }) =>
+              isActive
+                ? "header__nav-link active"
+                : "header__nav-link"
+            }
+          >
+            Home
+          </NavLink>
+
+          {/* Category links */}
           {categories.map((category) => (
             <NavLink
               key={category.name}
@@ -65,6 +108,10 @@ const Header = () => {
             placeholder="Search products..."
             allowClear
             className="w-full"
+            value={searchTerm}
+            onChange={(e) => setSearchTerm(e.target.value)}
+            onSearch={handleSearch}
+            enterButton
           />
         </div>
 
@@ -95,10 +142,31 @@ const Header = () => {
         width={280}
       >
         <div className="mb-4">
-          <Search placeholder="Search products..." allowClear />
+          <Search
+            placeholder="Search products..."
+            allowClear
+            value={searchTerm}
+            onChange={(e) => setSearchTerm(e.target.value)}
+            onSearch={(value) => {
+              handleSearch(value);
+              setMobileMenuOpen(false);
+            }}
+            enterButton
+          />
         </div>
 
         <Menu mode="vertical">
+          {/* Home link */}
+          <Menu.Item key="home">
+            <Link
+              to="/products"
+              onClick={() => setMobileMenuOpen(false)}
+            >
+              Home
+            </Link>
+          </Menu.Item>
+
+          {/* Category navigation */}
           {categories.map((category) => (
             <Menu.Item key={category.name}>
               <Link
