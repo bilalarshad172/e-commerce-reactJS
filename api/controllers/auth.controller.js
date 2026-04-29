@@ -140,6 +140,16 @@ export const login = async (req, res, next) => {
   }
 };
 
+export const logout = async (req, res) => {
+  res
+    .clearCookie("access_token", {
+      httpOnly: true,
+      sameSite: "strict",
+    })
+    .status(200)
+    .json({ message: "Logout successful" });
+};
+
 export const getAllUsers = async (req, res, next) => {
   try {
     const users = await User.find();

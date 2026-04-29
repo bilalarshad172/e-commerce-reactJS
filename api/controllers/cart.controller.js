@@ -1,63 +1,83 @@
 import Cart from "../models/cart.model.js";
-import User from "../models/user.model.js";
 import Product from "../models/product.model.js";
 import {
   checkInventoryAvailability,
   reserveInventory,
   releaseReservation,
-  getAvailableQuantity
+  getAvailableQuantity,
 } from "../services/inventory.service.js";
+import { buildPopulatedCartResponse } from "../utils/cartResponse.js";
 
-export const addToCart = async (req, res) => {
-  try {
-    const { user, cartItems } = req.body; // Extract cartItems as an array
+const validateCartItemsPayload = (cartItems) => {
+  if (!Array.isArray(cartItems) || cartItems.length === 0) {
+    return "Cart items are required.";
+  }
 
-    const userExists = await User.findById(user);
-    if (!userExists) {
-      return res.status(400).json({ error: "Invalid user ID." });
+  for (const item of cartItems) {
+    if (!item?.product || !Number.isInteger(item.quantity) || item.quantity < 1) {
+      return "Each cart item must include a valid product and quantity.";
+    }
+  }
+
+  return null;
+};
+
+const validateInventoryAndReserve = async (userId, cartItems) => {
+  for (const { product, quantity } of cartItems) {
+    const productExists = await Product.findById(product);
+    if (!productExists) {
+      return {
+        status: 400,
+        body: { error: "Product not found", productId: product },
+      };
     }
 
-    if (!cartItems || !cartItems.length) {
-      return res.status(400).json({ error: "Cart items are required." });
-    }
-
-    // Check inventory availability for each product
-    for (const item of cartItems) {
-      const { product, quantity } = item;
-
-      // Check if product exists
-      const productExists = await Product.findById(product);
-      if (!productExists) {
-        return res.status(400).json({
-          error: "Product not found",
-          productId: product
-        });
-      }
-
-      // Check if product has enough inventory
-      const isAvailable = await checkInventoryAvailability(product, quantity);
-      if (!isAvailable) {
-        const availableQty = await getAvailableQuantity(product);
-        return res.status(400).json({
+    const isAvailable = await checkInventoryAvailability(product, quantity);
+    if (!isAvailable) {
+      const availableQty = await getAvailableQuantity(product);
+      return {
+        status: 400,
+        body: {
           error: "Not enough inventory available",
           productId: product,
           productTitle: productExists.title,
           requestedQuantity: quantity,
-          availableQuantity: availableQty
-        });
-      }
-
-      // Reserve the inventory
-      await reserveInventory(user, product, quantity);
+          availableQuantity: availableQty,
+        },
+      };
     }
 
-    let cart = await Cart.findOne({ user });
+    await reserveInventory(userId, product, quantity);
+  }
+
+  return null;
+};
+
+export const addToCart = async (req, res) => {
+  try {
+    const userId = req.user?.id;
+    const { cartItems } = req.body;
+
+    if (!userId) {
+      return res.status(401).json({ error: "UNAUTHORIZED", message: "Authentication required." });
+    }
+
+    const validationError = validateCartItemsPayload(cartItems);
+    if (validationError) {
+      return res.status(400).json({ error: validationError });
+    }
+
+    const inventoryError = await validateInventoryAndReserve(userId, cartItems);
+    if (inventoryError) {
+      return res.status(inventoryError.status).json(inventoryError.body);
+    }
+
+    let cart = await Cart.findOne({ user: userId });
 
     if (cart) {
-      // Process each cart item
       for (const { product, quantity } of cartItems) {
         const item = cart.cartItems.find(
-          (item) => item.product.toString() === product
+          (cartItem) => cartItem.product.toString() === product
         );
         if (item) {
           item.quantity += quantity;
@@ -67,18 +87,60 @@ export const addToCart = async (req, res) => {
       }
       await cart.save();
     } else {
-      cart = await Cart.create({ user, cartItems });
+      cart = await Cart.create({ user: userId, cartItems });
     }
 
-    // Return the cart with populated product data
-    const populatedCart = await Cart.findOne({ user }).populate({
-      path: "cartItems.product",
-      select: "title price images countInStock",
-    });
-
-    return res.status(201).json(populatedCart);
+    const cartResponse = await buildPopulatedCartResponse(userId);
+    return res.status(201).json(cartResponse);
   } catch (error) {
     console.error("Error adding to cart:", error);
+    return res.status(500).json({ error: error.message });
+  }
+};
+
+export const mergeCart = async (req, res) => {
+  try {
+    const userId = req.user?.id;
+    const { cartItems } = req.body;
+
+    if (!userId) {
+      return res.status(401).json({ error: "UNAUTHORIZED", message: "Authentication required." });
+    }
+
+    const validationError = validateCartItemsPayload(cartItems);
+    if (validationError) {
+      return res.status(400).json({ error: validationError });
+    }
+
+    const inventoryError = await validateInventoryAndReserve(userId, cartItems);
+    if (inventoryError) {
+      return res.status(inventoryError.status).json(inventoryError.body);
+    }
+
+    let cart = await Cart.findOne({ user: userId });
+    if (!cart) {
+      cart = await Cart.create({ user: userId, cartItems: [] });
+    }
+
+    for (const { product, quantity } of cartItems) {
+      const existingItem = cart.cartItems.find(
+        (item) => item.product.toString() === product
+      );
+      if (existingItem) {
+        existingItem.quantity += quantity;
+      } else {
+        cart.cartItems.push({ product, quantity });
+      }
+    }
+
+    await cart.save();
+    const cartResponse = await buildPopulatedCartResponse(userId);
+    return res.status(200).json({
+      message: "Guest cart merged successfully",
+      ...cartResponse,
+    });
+  } catch (error) {
+    console.error("Error merging cart:", error);
     return res.status(500).json({ error: error.message });
   }
 };
@@ -90,49 +152,8 @@ export const getCart = async (req, res) => {
       return res.status(400).json({ error: "User ID is required" });
     }
 
-    const cart = await Cart.findOne({ user: userId }).populate({
-      path: "cartItems.product",
-      select: "title price images countInStock", // Include inventory information
-    });
-
-    if (!cart) {
-      return res.status(200).json({ cartItems: [] }); // Return empty cartItems array if no cart found
-    }
-
-    // Get the original length before filtering
-    const originalLength = cart.cartItems.length;
-
-    // Filter out any cart items where the product no longer exists (was deleted)
-    cart.cartItems = cart.cartItems.filter(item => item.product !== null);
-
-    // Check inventory availability for each item
-    const cartItemsWithAvailability = await Promise.all(
-      cart.cartItems.map(async (item) => {
-        if (!item.product) return item;
-
-        // Get available quantity for this product
-        const availableQuantity = await getAvailableQuantity(item.product._id);
-
-        // Add availability information to the item
-        return {
-          ...item.toObject(),
-          availableQuantity,
-          inStock: availableQuantity > 0,
-          hasEnoughStock: availableQuantity >= item.quantity
-        };
-      })
-    );
-
-    // Save the cart if any items were filtered out
-    if (cart.cartItems.length < originalLength) {
-      await cart.save();
-    }
-
-    // Return cart with availability information
-    return res.status(200).json({
-      ...cart.toObject(),
-      cartItems: cartItemsWithAvailability
-    });
+    const cartResponse = await buildPopulatedCartResponse(userId);
+    return res.status(200).json(cartResponse);
   } catch (error) {
     console.error("Error getting cart:", error);
     return res.status(500).json({ error: error.message });
@@ -164,35 +185,8 @@ export const removeFromCart = async (req, res) => {
 
     await cart.save();
 
-    // Return the updated cart with populated product data
-    const updatedCart = await Cart.findOne({ user: userId }).populate({
-      path: "cartItems.product",
-      select: "title price images countInStock",
-    });
-
-    // Add availability information to each cart item
-    const cartItemsWithAvailability = await Promise.all(
-      updatedCart.cartItems.map(async (item) => {
-        if (!item.product) return item;
-
-        // Get available quantity for this product
-        const availableQuantity = await getAvailableQuantity(item.product._id);
-
-        // Add availability information to the item
-        return {
-          ...item.toObject(),
-          availableQuantity,
-          inStock: availableQuantity > 0,
-          hasEnoughStock: availableQuantity >= item.quantity
-        };
-      })
-    );
-
-    // Return cart with availability information
-    return res.status(200).json({
-      ...updatedCart.toObject(),
-      cartItems: cartItemsWithAvailability
-    });
+    const cartResponse = await buildPopulatedCartResponse(userId);
+    return res.status(200).json(cartResponse);
   } catch (error) {
     console.error("Error removing from cart:", error);
     return res.status(500).json({ error: error.message });
@@ -256,35 +250,8 @@ export const updateCart = async (req, res) => {
 
     await cart.save();
 
-    // Return the updated cart with populated product data
-    const updatedCart = await Cart.findOne({ user: userId }).populate({
-      path: "cartItems.product",
-      select: "title price images countInStock",
-    });
-
-    // Add availability information to each cart item
-    const cartItemsWithAvailability = await Promise.all(
-      updatedCart.cartItems.map(async (item) => {
-        if (!item.product) return item;
-
-        // Get available quantity for this product
-        const availableQuantity = await getAvailableQuantity(item.product._id);
-
-        // Add availability information to the item
-        return {
-          ...item.toObject(),
-          availableQuantity,
-          inStock: availableQuantity > 0,
-          hasEnoughStock: availableQuantity >= item.quantity
-        };
-      })
-    );
-
-    // Return cart with availability information
-    return res.status(200).json({
-      ...updatedCart.toObject(),
-      cartItems: cartItemsWithAvailability
-    });
+    const cartResponse = await buildPopulatedCartResponse(userId);
+    return res.status(200).json(cartResponse);
   } catch (error) {
     console.error("Error updating cart:", error);
     return res.status(500).json({ error: error.message });
