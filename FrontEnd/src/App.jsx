@@ -31,7 +31,8 @@ function App() {
     <BrowserRouter>
       <Routes>
         {/* Public Routes */}
-        <Route path="/" element={<Login />} />
+        <Route path="/" element={<ProductListing />} />
+        <Route path="/login" element={<Login />} />
         <Route path="/signup" element={<Signup />} />
 
         {/* Admin Routes */}
@@ -63,14 +64,7 @@ function App() {
         </Route>
 
         {/* Protected Routes */}
-        <Route
-          path="/products"
-          element={
-            // <ProtectedRoute>
-              <ProductListing />
-            // </ProtectedRoute>
-          }
-        />
+        <Route path="/products" element={<Navigate to="/" replace />} />
         <Route
           path="/products/:id"
           element={

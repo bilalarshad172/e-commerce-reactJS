@@ -1,55 +1,78 @@
 import React, { useState, useEffect } from "react";
 import { Avatar, Popover } from "antd";
 import { UserOutlined } from "@ant-design/icons";
-import { getUserProfile, logout } from "../redux/authSlice";
+import { getUserProfile, logoutUser, clearAuthState } from "../redux/authSlice";
 import { useDispatch, useSelector } from "react-redux";
 import { useNavigate } from "react-router-dom";
 
 const Profile = () => {
   const dispatch = useDispatch();
   const navigate = useNavigate();
-  const { user, loading, error } = useSelector((state) => state.auth);
+  const { user, isAuthenticated } = useSelector((state) => state.auth);
   const [open, setOpen] = useState(false);
-  const hide = () => {
+
+  const goToProfile = () => {
     navigate("/user/profile");
     setOpen(false);
   };
 
-  const handleSignout = () => {
-    dispatch(logout());
-    if (!error) {
-      // Navigate to login page on successful signup
-      navigate("/");
+  const handleSignout = async () => {
+    try {
+      await dispatch(logoutUser()).unwrap();
+    } catch (_) {
+      dispatch(clearAuthState());
     }
+
+    navigate("/login");
     setOpen(false);
   };
+
   const handleOpenChange = (newOpen) => {
     setOpen(newOpen);
   };
-  console.log(user);
+
   useEffect(() => {
     dispatch(getUserProfile())
       .unwrap()
       .catch((err) => {
         if (err === "Unauthorized") {
-          // handle redirect or some other logic
+          dispatch(clearAuthState());
         }
       });
-  }, [dispatch]);
+  }, [dispatch, isAuthenticated]);
+
+  const authenticatedMenu = (
+    <div className="flex flex-col space-y-2">
+      <a onClick={goToProfile} className="hover:text-black cursor-pointer">Profile Setting</a>
+      <a
+        onClick={() => {
+          navigate("/my-orders");
+          setOpen(false);
+        }}
+        className="hover:text-black cursor-pointer"
+      >
+        My Orders
+      </a>
+      <a onClick={handleSignout} className="hover:text-black cursor-pointer">Logout</a>
+    </div>
+  );
+
+  if (!isAuthenticated) {
+    return (
+      <button
+        type="button"
+        onClick={() => navigate("/login")}
+        className="px-3 py-2 border border-black rounded-md text-sm font-medium hover:bg-black hover:text-white transition-colors"
+      >
+        Login / Signup
+      </button>
+    );
+  }
 
   return (
     <div>
       <Popover
-        content={
-          <div className="flex flex-col space-y-2">
-            <a onClick={hide} className="hover:text-black cursor-pointer">Profile Setting</a>
-            <a onClick={() => {
-              navigate("/my-orders");
-              setOpen(false);
-            }} className="hover:text-black cursor-pointer">My Orders</a>
-            <a onClick={handleSignout} className="hover:text-black cursor-pointer">Logout</a>
-          </div>
-        }
+        content={authenticatedMenu}
         title={user?.username}
         trigger="click"
         style={{
@@ -61,15 +84,15 @@ const Profile = () => {
         {user?.photoURL ? (
           <img
             src={user.photoURL}
-            alt="profile test"
+            alt="profile"
             style={{
               width: 40,
               height: 40,
-              borderRadius: "50%", // makes it fully rounded
-              objectFit: "cover", // ensures the image scales nicely within the circle
-              cursor: "pointer", // optional, if you want a pointer on hover
+              borderRadius: "50%",
+              objectFit: "cover",
+              cursor: "pointer",
             }}
-            onError={() => console.log("Image failed to load")}
+            onError={() => {}}
           />
         ) : (
           <Avatar
@@ -80,14 +103,6 @@ const Profile = () => {
             icon={<UserOutlined />}
           />
         )}
-        {/* <Avatar
-          style={{
-            backgroundColor: "#87d068",
-                      cursor: "pointer",
-
-          }}
-          icon={<UserOutlined />}
-        /> */}
       </Popover>
     </div>
   );

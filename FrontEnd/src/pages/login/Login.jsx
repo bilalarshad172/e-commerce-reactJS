@@ -42,8 +42,8 @@ const login = () => {
 
       // Check if login was successful
       if (getUser.fulfilled.match(resultAction)) {
-        // Navigate to the products page on successful login
-        navigate("/products");
+        // Navigate to the storefront page on successful login
+        navigate("/");
         message.success("Login successful!");
       } else {
         console.error("Login failed:", resultAction.payload || "Unknown error");

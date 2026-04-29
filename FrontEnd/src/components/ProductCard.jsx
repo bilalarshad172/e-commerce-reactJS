@@ -129,7 +129,7 @@ const ProductCard = ({ product }) => {
       
       {/* Price and add to cart */}
       <div className="mt-auto pt-4 flex justify-between items-center">
-        <span className="text-xl font-bold">${product.price?.toFixed(2)}</span>
+        <span className="text-xl font-bold">PKR {product.price?.toFixed(2)}</span>
         <Button
           type="primary"
           icon={<ShoppingCartOutlined />}

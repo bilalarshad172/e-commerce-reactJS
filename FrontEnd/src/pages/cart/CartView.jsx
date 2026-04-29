@@ -117,7 +117,7 @@ const CartView = () => {
       title: "Price",
       dataIndex: ["product", "price"], // Access product price
       key: "price",
-      render: (price) => `₨ ${price || 0}`, // Format price
+      render: (price) => `PKR ${price || 0}`, // Format price
     },
     {
       title: "Quantity",
@@ -147,7 +147,7 @@ const CartView = () => {
       render: (_, record) => {
         const price = record.product?.price || 0;
         const quantity = record.quantity || 0;
-        return `₨ ${(price * quantity)}`;
+        return `PKR ${(price * quantity)}`;
       },
     },
     {
@@ -257,24 +257,24 @@ const CartView = () => {
 
                   <div className="flex justify-between mb-2">
                     <span>Subtotal</span>
-                    <span>₨ {itemsPrice}</span>
+                    <span>PKR {itemsPrice}</span>
                   </div>
 
                   <div className="flex justify-between mb-2">
                     <span>Shipping</span>
-                    <span>₨ {shippingPrice}</span>
+                    <span>PKR {shippingPrice}</span>
                   </div>
 
                   <div className="flex justify-between mb-2">
                     <span>Tax</span>
-                    <span>₨ {taxPrice}</span>
+                    <span>PKR {taxPrice}</span>
                   </div>
 
                   <Divider className="my-2" />
 
                   <div className="flex justify-between font-bold text-lg">
                     <span>Total</span>
-                    <span>₨ {totalPrice}</span>
+                    <span>PKR {totalPrice}</span>
                   </div>
 
                   <Button

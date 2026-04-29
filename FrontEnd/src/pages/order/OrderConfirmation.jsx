@@ -108,20 +108,20 @@ const OrderConfirmation = () => {
                 <div className="bg-gray-50 p-4 rounded">
                   <div className="flex justify-between mb-2">
                     <p>Items:</p>
-                    <p>₨ {orderDetails.itemsPrice}</p>
+                    <p>PKR {orderDetails.itemsPrice}</p>
                   </div>
                   <div className="flex justify-between mb-2">
                     <p>Shipping:</p>
-                    <p>₨ {orderDetails.shippingPrice}</p>
+                    <p>PKR {orderDetails.shippingPrice}</p>
                   </div>
                   <div className="flex justify-between mb-2">
                     <p>Tax:</p>
-                    <p>₨ {orderDetails.taxPrice}</p>
+                    <p>PKR {orderDetails.taxPrice}</p>
                   </div>
                   <Divider className="my-2" />
                   <div className="flex justify-between font-bold">
                     <p>Total:</p>
-                    <p>₨ {orderDetails.totalPrice}</p>
+                    <p>PKR {orderDetails.totalPrice}</p>
                   </div>
                 </div>
                 
@@ -151,7 +151,7 @@ const OrderConfirmation = () => {
                         <p>Qty: {item.quantity}</p>
                       </div>
                     </div>
-                    <p>₨ {item.price * item.quantity}</p>
+                    <p>PKR {item.price * item.quantity}</p>
                   </div>
                 ))}
               </div>

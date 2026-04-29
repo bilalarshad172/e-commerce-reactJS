@@ -5,7 +5,6 @@ import {
   ArrowDownOutlined,
   ShoppingOutlined,
   UserOutlined,
-  DollarOutlined,
   ShoppingCartOutlined,
   ReloadOutlined
 } from '@ant-design/icons';
@@ -61,8 +60,7 @@ const Dashboard = () => {
               value={stats.totalSales}
               precision={2}
               valueStyle={{ color: '#3f8600' }}
-              prefix={<DollarOutlined />}
-              suffix="$"
+              prefix="PKR "
             />
             <div className="mt-2 flex items-center">
               <ArrowUpOutlined className="text-green-500 mr-1" />
@@ -162,13 +160,13 @@ const Dashboard = () => {
         <TabPane tab="Sales" key="2">
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
             <div className="lg:col-span-1">
-              <SalesCard title="Today's Sales" value="1,250" icon={<DollarOutlined />} color="green" />
+              <SalesCard title="Today's Sales" value="1,250" color="green" />
             </div>
             <div className="lg:col-span-1">
-              <SalesCard title="Weekly Sales" value="8,970" icon={<DollarOutlined />} color="blue" />
+              <SalesCard title="Weekly Sales" value="8,970" color="blue" />
             </div>
             <div className="lg:col-span-1">
-              <SalesCard title="Monthly Sales" value="32,450" icon={<DollarOutlined />} color="purple" />
+              <SalesCard title="Monthly Sales" value="32,450" color="purple" />
             </div>
           </div>
         </TabPane>
@@ -200,7 +198,7 @@ const Dashboard = () => {
                     <div className="text-gray-500 text-sm">Customer: John Doe</div>
                   </div>
                   <div className="text-right">
-                    <div className="font-medium">${Math.floor(Math.random() * 500)}.00</div>
+                    <div className="font-medium">PKR {Math.floor(Math.random() * 500)}.00</div>
                     <div className="text-xs px-2 py-1 rounded-full bg-green-100 text-green-800 inline-block">Completed</div>
                   </div>
                 </div>
@@ -220,7 +218,7 @@ const Dashboard = () => {
                   <div className="w-10 h-10 bg-gray-200 rounded-md mr-3"></div>
                   <div className="flex-grow">
                     <div className="font-medium">Product Name</div>
-                    <div className="text-gray-500 text-sm">${Math.floor(Math.random() * 100)}.00</div>
+                    <div className="text-gray-500 text-sm">PKR {Math.floor(Math.random() * 100)}.00</div>
                   </div>
                   <div className="text-right">
                     <div className="font-medium">{Math.floor(Math.random() * 100)} sold</div>

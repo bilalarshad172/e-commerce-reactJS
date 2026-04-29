@@ -5,7 +5,7 @@ import { Layout, Typography, Avatar, Dropdown, Space, Badge } from "antd";
 import { BellOutlined, UserOutlined, DownOutlined } from "@ant-design/icons";
 import { useSelector, useDispatch } from "react-redux";
 import { useNavigate } from "react-router-dom";
-import { logout } from "../../../redux/authSlice";
+import { logoutUser, clearAuthState } from "../../../redux/authSlice";
 
 const { Header, Content } = Layout;
 const { Title } = Typography;
@@ -15,8 +15,12 @@ const AdminLayout = () => {
   const dispatch = useDispatch();
   const navigate = useNavigate();
 
-  const handleLogout = () => {
-    dispatch(logout());
+  const handleLogout = async () => {
+    try {
+      await dispatch(logoutUser()).unwrap();
+    } catch (_) {
+      dispatch(clearAuthState());
+    }
     navigate("/admin101");
   };
 

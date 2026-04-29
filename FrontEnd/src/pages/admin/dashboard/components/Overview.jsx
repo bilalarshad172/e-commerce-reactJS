@@ -60,7 +60,7 @@ const Overview = () => {
     },
     yAxis: {
       title: {
-        text: 'Amount ($)',
+        text: 'Amount (PKR)',
         style: {
           color: '#666',
           fontSize: '12px',
@@ -69,7 +69,7 @@ const Overview = () => {
       },
       labels: {
         formatter: function() {
-          return '$' + this.value.toLocaleString();
+          return 'PKR ' + this.value.toLocaleString();
         },
         style: {
           color: '#666',
@@ -102,7 +102,7 @@ const Overview = () => {
         tooltip += '<div style="width: 10px; height: 10px; border-radius: 50%; background-color: ' + '#24D2B5' + '; margin-right: 8px;"></div>';
         tooltip += '<span style="color: #555;">Income: </span>';
         tooltip += '</div>';
-        tooltip += '<strong style="margin-left: 12px; color: #333;">$' + this.points[0].y.toLocaleString() + '</strong>';
+        tooltip += '<strong style="margin-left: 12px; color: #333;">PKR ' + this.points[0].y.toLocaleString() + '</strong>';
         tooltip += '</div>';
 
         // Expense
@@ -111,7 +111,7 @@ const Overview = () => {
         tooltip += '<div style="width: 10px; height: 10px; border-radius: 50%; background-color: ' + '#20AEE3' + '; margin-right: 8px;"></div>';
         tooltip += '<span style="color: #555;">Expense: </span>';
         tooltip += '</div>';
-        tooltip += '<strong style="margin-left: 12px; color: #333;">$' + this.points[1].y.toLocaleString() + '</strong>';
+        tooltip += '<strong style="margin-left: 12px; color: #333;">PKR ' + this.points[1].y.toLocaleString() + '</strong>';
         tooltip += '</div>';
 
         // Profit
@@ -121,7 +121,7 @@ const Overview = () => {
         tooltip += '<div style="width: 10px; height: 10px; border-radius: 50%; background-color: ' + '#000000' + '; margin-right: 8px;"></div>';
         tooltip += '<span style="color: #555;">Profit: </span>';
         tooltip += '</div>';
-        tooltip += '<strong style="margin-left: 12px; color: #333;">$' + profit.toLocaleString() + '</strong>';
+        tooltip += '<strong style="margin-left: 12px; color: #333;">PKR ' + profit.toLocaleString() + '</strong>';
         tooltip += '</div>';
 
         tooltip += '</div>';
@@ -228,19 +228,19 @@ const Overview = () => {
           <div className="bg-gray-50 p-4 rounded-lg border border-gray-100">
             <p className="text-sm text-gray-500 mb-1">Total Income</p>
             <h4 className="text-xl font-bold text-gray-800">
-              ${chartData.income.reduce((sum, val) => sum + val, 0).toLocaleString()}
+              PKR {chartData.income.reduce((sum, val) => sum + val, 0).toLocaleString()}
             </h4>
           </div>
           <div className="bg-gray-50 p-4 rounded-lg border border-gray-100">
             <p className="text-sm text-gray-500 mb-1">Total Expenses</p>
             <h4 className="text-xl font-bold text-gray-800">
-              ${chartData.expense.reduce((sum, val) => sum + val, 0).toLocaleString()}
+              PKR {chartData.expense.reduce((sum, val) => sum + val, 0).toLocaleString()}
             </h4>
           </div>
           <div className="bg-gray-50 p-4 rounded-lg border border-gray-100">
             <p className="text-sm text-gray-500 mb-1">Net Profit</p>
             <h4 className="text-xl font-bold text-gray-800">
-              ${(chartData.income.reduce((sum, val) => sum + val, 0) -
+              PKR {(chartData.income.reduce((sum, val) => sum + val, 0) -
                  chartData.expense.reduce((sum, val) => sum + val, 0)).toLocaleString()}
             </h4>
           </div>

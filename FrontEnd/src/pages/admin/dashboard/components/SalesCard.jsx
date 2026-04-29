@@ -1,8 +1,7 @@
 import React from "react";
-import { DollarOutlined } from "@ant-design/icons";
 import { Card, Statistic } from "antd";
 
-const SalesCard = ({ title = "Total Sales", value = "5000", icon = <DollarOutlined />, color = "black" }) => {
+const SalesCard = ({ title = "Total Sales", value = "5000", icon, color = "black" }) => {
   // Map color names to tailwind classes
   const colorMap = {
     black: "bg-black text-white",
@@ -22,13 +21,13 @@ const SalesCard = ({ title = "Total Sales", value = "5000", icon = <DollarOutlin
     <Card className="shadow-sm hover:shadow-md transition-shadow">
       <div className="grid grid-cols-2 gap-4">
         <div className={`col-span-1 text-center ${bgColorClass} p-4 rounded-lg flex items-center justify-center`}>
-          {React.cloneElement(icon, { style: { fontSize: "48px" } })}
+          {icon ? React.cloneElement(icon, { style: { fontSize: "48px" } }) : null}
         </div>
         <div className="col-span-1 flex flex-col justify-center">
           <Statistic
             title={<span className="text-gray-600 font-medium">{title}</span>}
             value={value}
-            prefix="$"
+            prefix="PKR "
             valueStyle={{ fontSize: '24px', fontWeight: 'bold' }}
           />
         </div>

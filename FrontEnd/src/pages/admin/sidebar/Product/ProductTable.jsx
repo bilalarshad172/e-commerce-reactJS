@@ -25,8 +25,7 @@ import {
   EyeOutlined,
   FilterOutlined,
   SettingOutlined,
-  ShoppingOutlined,
-  DollarOutlined
+  ShoppingOutlined
 } from "@ant-design/icons";
 import { useDispatch, useSelector } from "react-redux";
 import { fetchProducts, deleteProduct } from "../../../../redux/productSlice";
@@ -248,8 +247,7 @@ const ProductTable = () => {
       key: "price",
       render: (price) => (
         <div className="font-medium">
-          <DollarOutlined className="mr-1 text-green-600" />
-          ${Number(price).toFixed(2)}
+          PKR {Number(price).toFixed(2)}
         </div>
       ),
       sorter: (a, b) => a.price - b.price,

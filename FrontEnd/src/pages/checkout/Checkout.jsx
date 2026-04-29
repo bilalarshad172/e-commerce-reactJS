@@ -251,7 +251,7 @@ const Checkout = () => {
                         )}
                       </div>
                     </div>
-                    <p>₨ {item.product.price * item.quantity}</p>
+                    <p>PKR {item.product.price * item.quantity}</p>
                   </div>
                 ))}
               </div>
@@ -262,19 +262,19 @@ const Checkout = () => {
               <div className="bg-gray-50 p-4 rounded">
                 <div className="flex justify-between mb-2">
                   <p>Items:</p>
-                  <p>₨ {itemsPrice}</p>
+                  <p>PKR {itemsPrice}</p>
                 </div>
                 <div className="flex justify-between mb-2">
                   <p>Shipping:</p>
-                  <p>₨ {shippingPrice}</p>
+                  <p>PKR {shippingPrice}</p>
                 </div>
                 <div className="flex justify-between mb-2">
                   <p>Tax:</p>
-                  <p>₨ {taxPrice}</p>
+                  <p>PKR {taxPrice}</p>
                 </div>
                 <div className="flex justify-between font-bold text-lg">
                   <p>Total:</p>
-                  <p>₨ {totalPrice}</p>
+                  <p>PKR {totalPrice}</p>
                 </div>
               </div>
             </div>
@@ -357,20 +357,20 @@ const Checkout = () => {
               <div className="mb-4">
                 <div className="flex justify-between mb-2">
                   <p>Items ({cartItems?.cartItems?.reduce((acc, item) => acc + item.quantity, 0) || 0}):</p>
-                  <p>₨ {itemsPrice}</p>
+                  <p>PKR {itemsPrice}</p>
                 </div>
                 <div className="flex justify-between mb-2">
                   <p>Shipping:</p>
-                  <p>₨ {shippingPrice}</p>
+                  <p>PKR {shippingPrice}</p>
                 </div>
                 <div className="flex justify-between mb-2">
                   <p>Tax:</p>
-                  <p>₨ {taxPrice}</p>
+                  <p>PKR {taxPrice}</p>
                 </div>
                 <Divider className="my-2" />
                 <div className="flex justify-between font-bold text-lg">
                   <p>Total:</p>
-                  <p>₨ {totalPrice}</p>
+                  <p>PKR {totalPrice}</p>
                 </div>
               </div>
             </div>

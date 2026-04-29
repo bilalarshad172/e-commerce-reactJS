@@ -16,7 +16,7 @@ import {
 } from "@ant-design/icons";
 import { NavLink, useLocation, useNavigate } from "react-router-dom";
 import { Tooltip, Divider, Button } from "antd";
-import { logout } from "../../../redux/authSlice";
+import { logoutUser, clearAuthState } from "../../../redux/authSlice";
 import { useDispatch } from "react-redux";
 
 const Sidebar = () => {
@@ -25,8 +25,12 @@ const Sidebar = () => {
   const navigate = useNavigate();
   const dispatch = useDispatch();
 
-  const handleLogout = () => {
-    dispatch(logout());
+  const handleLogout = async () => {
+    try {
+      await dispatch(logoutUser()).unwrap();
+    } catch (_) {
+      dispatch(clearAuthState());
+    }
     navigate("/admin101");
   };
 

@@ -248,11 +248,11 @@ const OrderDetails = () => {
                         />
                         <div>
                           <Text strong>{item.product.title}</Text>
-                          <div className="text-gray-500">₨ {item.price} × {item.quantity}</div>
+                          <div className="text-gray-500">PKR {item.price} × {item.quantity}</div>
                         </div>
                       </div>
                       <div className="text-right">
-                        <Text strong className="text-lg">₨ {item.price * item.quantity}</Text>
+                        <Text strong className="text-lg">PKR {item.price * item.quantity}</Text>
                       </div>
                     </div>
                   ))}
@@ -261,20 +261,20 @@ const OrderDetails = () => {
                 <div className="mt-4 bg-gray-50 p-4 rounded-md">
                   <div className="flex justify-between mb-2">
                     <Text>Subtotal</Text>
-                    <Text>₨ {orderDetails.itemsPrice}</Text>
+                    <Text>PKR {orderDetails.itemsPrice}</Text>
                   </div>
                   <div className="flex justify-between mb-2">
                     <Text>Shipping</Text>
-                    <Text>₨ {orderDetails.shippingPrice}</Text>
+                    <Text>PKR {orderDetails.shippingPrice}</Text>
                   </div>
                   <div className="flex justify-between mb-2">
                     <Text>Tax</Text>
-                    <Text>₨ {orderDetails.taxPrice}</Text>
+                    <Text>PKR {orderDetails.taxPrice}</Text>
                   </div>
                   <Divider className="my-2" />
                   <div className="flex justify-between">
                     <Text strong className="text-lg">Total</Text>
-                    <Text strong className="text-lg">₨ {orderDetails.totalPrice}</Text>
+                    <Text strong className="text-lg">PKR {orderDetails.totalPrice}</Text>
                   </div>
                 </div>
               </Card>

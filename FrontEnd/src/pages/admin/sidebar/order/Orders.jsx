@@ -5,7 +5,6 @@ import {
   SearchOutlined,
   ReloadOutlined,
   ShoppingOutlined,
-  DollarOutlined,
   ClockCircleOutlined,
   CheckCircleOutlined,
   FilterOutlined
@@ -103,7 +102,7 @@ const initialColumns = [
     title: "Total",
     dataIndex: "totalPrice",
     key: "total",
-    render: (price) => `₨ ${price}`,
+    render: (price) => `PKR ${price}`,
   },
   {
     title: "Actions",
@@ -276,8 +275,7 @@ const Orders = () => {
                   title={<span className="text-gray-600 font-medium">Total Revenue</span>}
                   value={orderStats.totalRevenue}
                   valueStyle={{ color: '#722ed1' }}
-                  prefix={<DollarOutlined />}
-                  suffix="₨"
+                  prefix="PKR "
                 />
               </Card>
             </Col>

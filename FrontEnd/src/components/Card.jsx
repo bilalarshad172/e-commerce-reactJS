@@ -228,7 +228,7 @@ const Card = ({ categoryFilter, limit }) => {
 
               {/* Product Price */}
               <div className="product-card__price">
-                ₨ {product.price}
+                PKR {product.price}
               </div>
 
               {/* Inventory Status */}

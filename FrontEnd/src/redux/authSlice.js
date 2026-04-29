@@ -71,6 +71,27 @@ export const getAllUsers = createAsyncThunk(
   }
 );
 
+export const logoutUser = createAsyncThunk(
+  "auth/logoutUser",
+  async (_, { rejectWithValue }) => {
+    try {
+      const response = await fetch("/api/auth/logout", {
+        method: "POST",
+        credentials: "include",
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json().catch(() => ({}));
+        throw new Error(errorData.message || "Failed to logout");
+      }
+
+      return await response.json();
+    } catch (error) {
+      return rejectWithValue(error.message);
+    }
+  }
+);
+
 export const getUserProfile = createAsyncThunk(
   "auth/getUserProfile",
   async (_, { rejectWithValue }) => {
@@ -136,7 +157,7 @@ const authSlice = createSlice({
   name: "auth",
   initialState,
   reducers: {
-    logout(state) {
+    clearAuthState(state) {
       state.isAuthenticated = false;
       state.user = null;
       state.error = null;
@@ -202,7 +223,18 @@ const authSlice = createSlice({
       .addCase(getUserProfile.rejected, (state, action) => {
         state.loading = false;
         state.error = action.payload;
-        // If it's "Unauthorized", we might also do state.isAuthenticated = false;
+        if (action.payload === "Unauthorized") {
+          state.isAuthenticated = false;
+          state.user = null;
+        }
+      })
+      .addCase(logoutUser.fulfilled, (state) => {
+        state.isAuthenticated = false;
+        state.user = null;
+        state.error = null;
+      })
+      .addCase(logoutUser.rejected, (state, action) => {
+        state.error = action.payload;
       })
       .addCase(updateUserProfile.fulfilled, (state, action) => {
         state.error = null;
@@ -216,6 +248,6 @@ const authSlice = createSlice({
   },
 });
 
-export const { logout, clearError } = authSlice.actions;
+export const { clearAuthState, clearError } = authSlice.actions;
 
 export default authSlice.reducer;

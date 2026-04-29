@@ -247,7 +247,7 @@ const ProductView = () => {
               </div>
 
               <div className="product-info__price">
-                ₨ {productForEdit.price}
+                PKR {productForEdit.price}
               </div>
 
               <div className="product-info__meta">

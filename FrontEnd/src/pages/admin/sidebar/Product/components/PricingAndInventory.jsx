@@ -21,7 +21,7 @@ const PricingAndInventory = ({ price, setPrice, countInStock, setCountInStock })
             label={
               <span className="font-medium">
                 Price <span className="text-red-500">*</span>
-                <Tooltip title="Enter the product price in dollars">
+                <Tooltip title="Enter the product price in PKR">
                   <InfoCircleOutlined className="ml-1 text-gray-400" />
                 </Tooltip>
               </span>
@@ -42,7 +42,7 @@ const PricingAndInventory = ({ price, setPrice, countInStock, setCountInStock })
               id="pro_price"
               className="rounded-md"
               formatter={value => `${value}`.replace(/\B(?=(\d{3})+(?!\d))/g, ',')}
-              parser={value => value.replace(/\$\s?|(,*)/g, '')}
+              parser={value => value.replace(/PKR\s?|(,*)/g, '')}
             />
           </Form.Item>
 

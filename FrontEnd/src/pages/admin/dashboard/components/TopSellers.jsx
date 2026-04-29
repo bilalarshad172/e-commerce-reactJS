@@ -92,7 +92,7 @@ const columns = [
     dataIndex: 'price',
     key: 'price',
     render: (price) => (
-      <span className="font-medium">${price.toFixed(2)}</span>
+      <span className="font-medium">PKR {price.toFixed(2)}</span>
     ),
     sorter: (a, b) => a.price - b.price,
   },

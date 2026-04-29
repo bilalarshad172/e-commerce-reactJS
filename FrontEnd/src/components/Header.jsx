@@ -60,7 +60,7 @@ const Header = () => {
     <header className="header">
       <div className="container header__container">
         {/* Logo */}
-        <Link to="/products" className="header__logo">
+        <Link to="/" className="header__logo">
           Tanzayb
         </Link>
 
@@ -76,7 +76,7 @@ const Header = () => {
         <nav className="hidden md:flex items-center space-x-6">
           {/* Home link */}
           <NavLink
-            to="/products"
+            to="/"
             className={({ isActive }) =>
               isActive
                 ? "header__nav-link active"
@@ -159,7 +159,7 @@ const Header = () => {
           {/* Home link */}
           <Menu.Item key="home">
             <Link
-              to="/products"
+              to="/"
               onClick={() => setMobileMenuOpen(false)}
             >
               Home

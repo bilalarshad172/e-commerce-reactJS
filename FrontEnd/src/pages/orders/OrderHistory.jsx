@@ -84,7 +84,7 @@ const OrderHistory = () => {
       title: "Total",
       dataIndex: "totalPrice",
       key: "totalPrice",
-      render: (price) => `₨ ${price}`,
+      render: (price) => `PKR ${price}`,
       sorter: (a, b) => a.totalPrice - b.totalPrice,
     },
     {
@@ -317,7 +317,7 @@ const OrderHistory = () => {
                     <div className="flex-grow">
                       <h4 className="font-medium">{item.product?.title}</h4>
                       <p className="text-gray-500">
-                        {item.quantity} x ₨ {item.price} = ₨{" "}
+                        {item.quantity} x PKR {item.price} = PKR{" "}
                         {item.quantity * item.price}
                       </p>
                     </div>
@@ -329,17 +329,17 @@ const OrderHistory = () => {
             <Divider orientation="left">Order Summary</Divider>
             <Descriptions bordered column={1} size="small">
               <Descriptions.Item label="Items Price">
-                ₨ {selectedOrder.itemsPrice}
+                PKR {selectedOrder.itemsPrice}
               </Descriptions.Item>
               <Descriptions.Item label="Shipping">
-                ₨ {selectedOrder.shippingPrice}
+                PKR {selectedOrder.shippingPrice}
               </Descriptions.Item>
               <Descriptions.Item label="Tax">
-                ₨ {selectedOrder.taxPrice}
+                PKR {selectedOrder.taxPrice}
               </Descriptions.Item>
               <Descriptions.Item label="Total">
                 <span className="text-lg font-bold">
-                  ₨ {selectedOrder.totalPrice}
+                  PKR {selectedOrder.totalPrice}
                 </span>
               </Descriptions.Item>
             </Descriptions>
