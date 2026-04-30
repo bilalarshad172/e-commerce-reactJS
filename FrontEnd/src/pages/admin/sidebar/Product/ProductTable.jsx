@@ -128,6 +128,7 @@ const ProductTable = () => {
   const [visibleColumns, setVisibleColumns] = useState(
     initialColumns.map((col) => col.key)
   );
+  const [stockFilter, setStockFilter] = useState("all");
 
   const handleColumnToggle = (key) => {
     setVisibleColumns((prev) =>
@@ -142,7 +143,7 @@ const ProductTable = () => {
   }, [dispatch]);
 
   // Create menu items for column visibility toggle
-  const menu = {
+  const columnMenu = {
     items: initialColumns.map((col) => ({
       key: col.key,
       label: (
@@ -330,11 +331,27 @@ const ProductTable = () => {
   // State for search term
   const [searchTerm, setSearchTerm] = useState('');
 
-  // Filtered products based on search
-  const filteredProducts = products ? products.filter(product =>
-    (product.title ? product.title.toLowerCase().includes(searchTerm.toLowerCase()) : false) ||
-    (product.brand?.title ? product.brand.title.toLowerCase().includes(searchTerm.toLowerCase()) : false)
-  ) : [];
+  const filterProductsByStock = (product) => {
+    if (stockFilter === "in") return product.countInStock > 10;
+    if (stockFilter === "low") return product.countInStock > 0 && product.countInStock <= 10;
+    if (stockFilter === "out") return product.countInStock <= 0;
+    return true;
+  };
+
+  // Filtered products based on search and stock filter.
+  const filteredProducts = products
+    ? products.filter((product) => {
+        const matchesSearch =
+          (product.title
+            ? product.title.toLowerCase().includes(searchTerm.toLowerCase())
+            : false) ||
+          (product.brand?.title
+            ? product.brand.title.toLowerCase().includes(searchTerm.toLowerCase())
+            : false);
+
+        return matchesSearch && filterProductsByStock(product);
+      })
+    : [];
 
   return (
     <div className="container mx-auto px-4">
@@ -367,7 +384,7 @@ const ProductTable = () => {
               />
             </div>
             <div className="flex gap-2">
-              <Dropdown menu={{ items: menu }} trigger={["click"]}>
+              <Dropdown menu={columnMenu} trigger={["click"]}>
                 <Button icon={<SettingOutlined />}>
                   Columns
                 </Button>
@@ -375,11 +392,12 @@ const ProductTable = () => {
               <Dropdown
                 menu={{
                   items: [
-                    { key: '1', label: 'All Products' },
-                    { key: '2', label: 'In Stock' },
-                    { key: '3', label: 'Low Stock' },
-                    { key: '4', label: 'Out of Stock' }
-                  ]
+                    { key: "all", label: "All Products" },
+                    { key: "in", label: "In Stock" },
+                    { key: "low", label: "Low Stock" },
+                    { key: "out", label: "Out of Stock" },
+                  ],
+                  onClick: ({ key }) => setStockFilter(key),
                 }}
                 trigger={["click"]}
               >

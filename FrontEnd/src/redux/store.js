@@ -5,6 +5,7 @@ import brandsReducer from "../redux/brandsSlice";
 import categoryReducer from "../redux/categorySlice";
 import cartReducer from "../redux/cartSlice";
 import orderReducer from "../redux/orderSlice";
+import adminDashboardReducer from "../redux/adminDashboardSlice";
 
 export const store = configureStore({
   reducer: {
@@ -14,5 +15,6 @@ export const store = configureStore({
     categories: categoryReducer,
     cart: cartReducer,
     orders: orderReducer,
+    adminDashboard: adminDashboardReducer,
   },
 });

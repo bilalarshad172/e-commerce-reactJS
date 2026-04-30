@@ -2,10 +2,8 @@ import React, { useState } from "react";
 import {
   DashboardOutlined,
   ShoppingCartOutlined,
-  EditOutlined,
   FileTextOutlined,
   UserOutlined,
-  SettingOutlined,
   AppstoreOutlined,
   TagsOutlined,
   MenuUnfoldOutlined,
@@ -64,13 +62,6 @@ const Sidebar = () => {
       color: "yellow"
     },
     {
-      key: "content",
-      icon: <EditOutlined />,
-      label: "Content",
-      path: "/admin/content",
-      color: "orange"
-    },
-    {
       key: "orders",
       icon: <FileTextOutlined />,
       label: "Orders",
@@ -83,13 +74,6 @@ const Sidebar = () => {
       label: "Users",
       path: "/admin/users",
       color: "pink"
-    },
-    {
-      key: "settings",
-      icon: <SettingOutlined />,
-      label: "Settings",
-      path: "/admin/settings",
-      color: "red"
     }
   ];
 

@@ -1,5 +1,5 @@
-import React from 'react';
-import { Typography, Row, Col, Card, Statistic, Progress, Tabs, Button } from 'antd';
+import React, { useEffect } from 'react';
+import { Typography, Row, Col, Card, Statistic, Progress, Button, Spin, Alert } from 'antd';
 import {
   ArrowUpOutlined,
   ArrowDownOutlined,
@@ -8,30 +8,54 @@ import {
   ShoppingCartOutlined,
   ReloadOutlined
 } from '@ant-design/icons';
-import UserChart from "./components/UserChart";
-import SalesCard from "./components/SalesCard";
-import TopSellers from "./components/TopSellers";
-import ReviewChart from "./components/ReviewChart";
-import Overview from "./components/Overview";
+import { useDispatch, useSelector } from "react-redux";
+import { fetchAdminDashboardSummary } from "../../../redux/adminDashboardSlice";
 
 const { Title, Text } = Typography;
-const { TabPane } = Tabs;
 
 const Dashboard = () => {
-  // Mock data for demonstration
-  const stats = {
-    totalSales: 15680,
-    salesGrowth: 12.5,
-    totalOrders: 256,
-    ordersGrowth: -3.8,
-    totalCustomers: 1245,
-    customersGrowth: 8.2,
-    totalProducts: 432,
-    lowStock: 15
+  const dispatch = useDispatch();
+  const { summary, loading, error } = useSelector((state) => state.adminDashboard);
+
+  useEffect(() => {
+    dispatch(fetchAdminDashboardSummary());
+  }, [dispatch]);
+
+  const handleRefresh = () => {
+    dispatch(fetchAdminDashboardSummary());
   };
+
+  const stats = {
+    totalSales: summary?.totalSales || 0,
+    salesGrowth: summary?.salesGrowth || 0,
+    totalOrders: summary?.totalOrders || 0,
+    ordersGrowth: summary?.ordersGrowth || 0,
+    totalCustomers: summary?.totalCustomers || 0,
+    customersGrowth: summary?.customersGrowth || 0,
+    totalProducts: summary?.totalProducts || 0,
+    lowStock: summary?.lowStockCount || 0,
+  };
+
+  if (loading && !summary) {
+    return (
+      <div className="flex justify-center items-center py-20">
+        <Spin size="large" />
+      </div>
+    );
+  }
 
   return (
     <div>
+      {error && (
+        <Alert
+          type="warning"
+          showIcon
+          className="mb-4"
+          message="Could not load latest dashboard data"
+          description={error}
+        />
+      )}
+
       {/* Welcome Section */}
       <div className="mb-6">
         <Row gutter={[16, 16]} align="middle" justify="space-between">
@@ -44,6 +68,7 @@ const Dashboard = () => {
               type="primary"
               icon={<ReloadOutlined />}
               className="bg-black hover:bg-gray-800"
+              onClick={handleRefresh}
             >
               Refresh Data
             </Button>
@@ -145,43 +170,6 @@ const Dashboard = () => {
         </Col>
       </Row>
 
-      {/* Charts Section */}
-      <Tabs defaultActiveKey="1" className="mb-6 bg-white p-4 rounded-lg shadow-sm">
-        <TabPane tab="Overview" key="1">
-          <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-            <div className="lg:col-span-2">
-              <Overview />
-            </div>
-            <div className="lg:col-span-1">
-              <UserChart />
-            </div>
-          </div>
-        </TabPane>
-        <TabPane tab="Sales" key="2">
-          <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-            <div className="lg:col-span-1">
-              <SalesCard title="Today's Sales" value="1,250" color="green" />
-            </div>
-            <div className="lg:col-span-1">
-              <SalesCard title="Weekly Sales" value="8,970" color="blue" />
-            </div>
-            <div className="lg:col-span-1">
-              <SalesCard title="Monthly Sales" value="32,450" color="purple" />
-            </div>
-          </div>
-        </TabPane>
-        <TabPane tab="Products" key="3">
-          <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-            <div className="lg:col-span-2">
-              <TopSellers />
-            </div>
-            <div className="lg:col-span-1">
-              <ReviewChart />
-            </div>
-          </div>
-        </TabPane>
-      </Tabs>
-
       {/* Additional Sections */}
       <Row gutter={[16, 16]}>
         <Col xs={24} lg={16}>
@@ -191,18 +179,23 @@ const Dashboard = () => {
             className="shadow-sm"
           >
             <div className="space-y-4">
-              {[1, 2, 3, 4, 5].map(item => (
-                <div key={item} className="flex justify-between items-center p-3 border-b last:border-0">
+              {(summary?.recentOrders || []).map((order) => (
+                <div key={order._id} className="flex justify-between items-center p-3 border-b last:border-0">
                   <div>
-                    <div className="font-medium">Order #{Math.floor(Math.random() * 10000)}</div>
-                    <div className="text-gray-500 text-sm">Customer: John Doe</div>
+                    <div className="font-medium">Order #{order._id?.slice(-6)}</div>
+                    <div className="text-gray-500 text-sm">Customer: {order.user?.username || "Unknown"}</div>
                   </div>
                   <div className="text-right">
-                    <div className="font-medium">PKR {Math.floor(Math.random() * 500)}.00</div>
-                    <div className="text-xs px-2 py-1 rounded-full bg-green-100 text-green-800 inline-block">Completed</div>
+                    <div className="font-medium">PKR {order.totalPrice || 0}</div>
+                    <div className="text-xs px-2 py-1 rounded-full bg-green-100 text-green-800 inline-block">
+                      {order.status || "Pending"}
+                    </div>
                   </div>
                 </div>
               ))}
+              {!summary?.recentOrders?.length && (
+                <p className="text-gray-500">No recent orders found.</p>
+              )}
             </div>
           </Card>
         </Col>
@@ -213,18 +206,21 @@ const Dashboard = () => {
             className="shadow-sm"
           >
             <div className="space-y-4">
-              {[1, 2, 3, 4, 5].map(item => (
-                <div key={item} className="flex items-center p-2 border-b last:border-0">
+              {(summary?.topProducts || []).map((product) => (
+                <div key={product._id} className="flex items-center p-2 border-b last:border-0">
                   <div className="w-10 h-10 bg-gray-200 rounded-md mr-3"></div>
                   <div className="flex-grow">
-                    <div className="font-medium">Product Name</div>
-                    <div className="text-gray-500 text-sm">PKR {Math.floor(Math.random() * 100)}.00</div>
+                    <div className="font-medium">{product.title || "Product Name"}</div>
+                    <div className="text-gray-500 text-sm">PKR {product.price || 0}</div>
                   </div>
                   <div className="text-right">
-                    <div className="font-medium">{Math.floor(Math.random() * 100)} sold</div>
+                    <div className="font-medium">{product.soldQuantity || 0} sold</div>
                   </div>
                 </div>
               ))}
+              {!summary?.topProducts?.length && (
+                <p className="text-gray-500">No top product data available.</p>
+              )}
             </div>
           </Card>
         </Col>
