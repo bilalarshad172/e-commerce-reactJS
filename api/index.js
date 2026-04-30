@@ -12,6 +12,7 @@ import UploadRoutes from "./routes/imageUpload.routes.js";
 import Category from "./models/category.model.js";
 import CartRoutes from "./routes/cart.route.js";
 import OrderRoutes from "./routes/order.route.js";
+import WishlistRoutes from "./routes/wishlist.route.js";
 import AdminDashboardRoutes from "./routes/adminDashboard.route.js";
 import { startScheduledTasks } from "./utils/scheduledTasks.js";
 import { fileURLToPath } from "url";
@@ -59,6 +60,7 @@ app.use("/api/", ProductRoutes);
 app.use('/api', UploadRoutes);
 app.use('/api', CartRoutes);
 app.use('/api', OrderRoutes);
+app.use('/api', WishlistRoutes);
 app.use('/api/admin', AdminDashboardRoutes);
 
 
