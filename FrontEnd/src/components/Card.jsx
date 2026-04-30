@@ -3,6 +3,7 @@ import React, { useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { fetchProducts } from "../redux/productSlice";
 import { AddtoCart } from "../redux/cartSlice";
+import { addToWishlist } from "../redux/wishlistSlice";
 import defaultImage from "../assets/default.png";
 import { Spin, Rate, message, Button, Tooltip } from "antd";
 import { FaShoppingCart, FaEye, FaHeart } from "react-icons/fa";
@@ -97,7 +98,6 @@ const Card = ({ categoryFilter, limit }) => {
     }
 
     const cartData = {
-      user: user._id,
       cartItems: [
         {
           product: product._id,
@@ -119,6 +119,25 @@ const Card = ({ categoryFilter, limit }) => {
         } else {
           message.error(`Failed to add to cart: ${err}`);
         }
+      });
+  };
+
+  const handleAddToWishlist = (e, product) => {
+    e.stopPropagation();
+
+    if (!user) {
+      message.warning("Please log in or sign up to add to wishlist");
+      navigate("/login");
+      return;
+    }
+
+    dispatch(addToWishlist(product._id))
+      .unwrap()
+      .then(() => {
+        message.success(`${product.title} added to wishlist`);
+      })
+      .catch((err) => {
+        message.error(`Failed to add to wishlist: ${err}`);
       });
   };
 
@@ -185,10 +204,7 @@ const Card = ({ categoryFilter, limit }) => {
                       <Button
                         type="text"
                         icon={<FaHeart color="white" />}
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          message.info("Wishlist feature coming soon!");
-                        }}
+                        onClick={(e) => handleAddToWishlist(e, product)}
                       />
                     </Tooltip>
                   </div>

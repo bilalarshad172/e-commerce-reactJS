@@ -30,6 +30,26 @@ const SearchResults = () => {
   // Redux state
   const { products, loadingAllProducts } = useSelector((state) => state.products);
   const { categories, loading: categoriesLoading } = useSelector((state) => state.categories);
+
+  const findCategoryNodeById = (nodes, targetId) => {
+    for (const node of nodes || []) {
+      if (node._id === targetId) return node;
+      if (node.children?.length) {
+        const found = findCategoryNodeById(node.children, targetId);
+        if (found) return found;
+      }
+    }
+    return null;
+  };
+
+  const collectCategoryIds = (node) => {
+    if (!node) return [];
+    const ids = [node._id];
+    for (const child of node.children || []) {
+      ids.push(...collectCategoryIds(child));
+    }
+    return ids;
+  };
   
   // Fetch products and categories on component mount
   useEffect(() => {
@@ -42,6 +62,13 @@ const SearchResults = () => {
     setSearchTerm(searchQuery);
     setSelectedCategory(categoryParam);
   }, [searchQuery, categoryParam]);
+
+  const selectedCategoryNode = selectedCategory
+    ? findCategoryNodeById(categories, selectedCategory)
+    : null;
+  const allowedCategoryIds = selectedCategoryNode
+    ? collectCategoryIds(selectedCategoryNode)
+    : [];
   
   // Filter products based on search term and category
   const filteredProducts = products?.filter(product => {
@@ -51,7 +78,9 @@ const SearchResults = () => {
       
     const matchesCategory = selectedCategory 
       ? product.category?.some(cat => 
-          cat._id === selectedCategory || cat.title?.toLowerCase() === selectedCategory.toLowerCase()
+          allowedCategoryIds.includes(cat._id) ||
+          cat._id === selectedCategory ||
+          cat.title?.toLowerCase() === selectedCategory.toLowerCase()
         ) 
       : true;
       
@@ -102,7 +131,7 @@ const SearchResults = () => {
       <div className="container mx-auto px-4 py-8">
         {/* Breadcrumb */}
         <Breadcrumb className="mb-6">
-          <Breadcrumb.Item href="/products">Home</Breadcrumb.Item>
+          <Breadcrumb.Item href="/">Home</Breadcrumb.Item>
           <Breadcrumb.Item>Search Results</Breadcrumb.Item>
           {searchTerm && <Breadcrumb.Item>{searchTerm}</Breadcrumb.Item>}
         </Breadcrumb>
@@ -143,7 +172,7 @@ const SearchResults = () => {
             {searchTerm 
               ? `Search results for "${searchTerm}"` 
               : selectedCategory 
-                ? `Products in ${categories?.find(c => c._id === selectedCategory)?.title || selectedCategory}` 
+                ? `Products in ${selectedCategoryNode?.title || selectedCategory}` 
                 : "All Products"}
           </h1>
           <p className="text-gray-600">
@@ -166,8 +195,8 @@ const SearchResults = () => {
                 <span>
                   No products found for your search
                   {searchTerm && <span> "{searchTerm}"</span>}
-                  {selectedCategory && categories?.find(c => c._id === selectedCategory) && 
-                    <span> in {categories.find(c => c._id === selectedCategory).title}</span>
+                  {selectedCategory && selectedCategoryNode && 
+                    <span> in {selectedCategoryNode.title}</span>
                   }
                 </span>
               } 

@@ -25,6 +25,7 @@ import CartView from "./pages/cart/CartView";
 import Checkout from "./pages/checkout/Checkout";
 import OrderConfirmation from "./pages/order/OrderConfirmation";
 import OrderHistory from "./pages/orders/OrderHistory";
+import Wishlist from "./pages/wishlist/Wishlist";
 
 function App() {
   return (
@@ -79,6 +80,7 @@ function App() {
         />
         <Route path="user/profile" element={<UserProfile />} />
         <Route path="products/cart" element={<CartView />} />
+        <Route path="wishlist" element={<Wishlist />} />
         <Route path="checkout" element={<Checkout />} />
         <Route path="order/:id" element={<OrderConfirmation />} />
         <Route

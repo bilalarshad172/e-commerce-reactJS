@@ -5,15 +5,36 @@ import { Card, Badge, Tag, Button, message } from "antd";
 import { ShoppingCartOutlined, HeartOutlined, EyeOutlined } from "@ant-design/icons";
 import DefaultImage from "../assets/default.png";
 import { AddtoCart } from "../redux/cartSlice";
+import { addToWishlist } from "../redux/wishlistSlice";
+import { useSelector } from "react-redux";
 
 const ProductCard = ({ product }) => {
   const navigate = useNavigate();
   const dispatch = useDispatch();
+  const { isAuthenticated } = useSelector((state) => state.auth);
   const [isHovered, setIsHovered] = useState(false);
   
   // Handle image loading error
   const handleImageError = (e) => {
     e.target.src = DefaultImage;
+  };
+
+  const handleAddToWishlist = (e) => {
+    e.stopPropagation();
+    if (!isAuthenticated) {
+      message.warning("Please log in or sign up to add to wishlist");
+      navigate("/login");
+      return;
+    }
+
+    dispatch(addToWishlist(product._id))
+      .unwrap()
+      .then(() => {
+        message.success(`${product.title} added to wishlist`);
+      })
+      .catch((err) => {
+        message.error(`Failed to add to wishlist: ${err}`);
+      });
   };
   
   // Navigate to product detail page
@@ -93,6 +114,7 @@ const ProductCard = ({ product }) => {
               type="primary" 
               shape="circle" 
               icon={<HeartOutlined />} 
+              onClick={handleAddToWishlist}
               className="bg-white text-black border-none hover:bg-gray-100"
             />
           </div>

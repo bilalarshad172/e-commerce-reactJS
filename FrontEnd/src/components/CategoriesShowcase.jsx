@@ -50,7 +50,7 @@ const CategoriesShowcase = () => {
         <div className="categories-showcase__grid">
           {displayedCategories.map((category, index) => (
             <Link 
-              to={`/products?category=${category._id}`} 
+              to={`/products/search?category=${category._id}`} 
               key={category._id}
               className="category-card"
             >

@@ -9,6 +9,7 @@ import { Spin, Tag, Rate, InputNumber, Button, Tabs, message, Breadcrumb } from 
 import { ShoppingCartOutlined, HeartOutlined, ShareAltOutlined } from "@ant-design/icons";
 import Card from "../../components/Card";
 import { AddtoCart } from "../../redux/cartSlice";
+import { addToWishlist } from "../../redux/wishlistSlice";
 
 const { TabPane } = Tabs;
 
@@ -84,7 +85,6 @@ const ProductView = () => {
 
     // Construct the cart data
     const cartData = {
-      user: user._id,
       cartItems: [
         {
           product: productForEdit._id,
@@ -107,6 +107,23 @@ const ProductView = () => {
         } else {
           message.error(`Error adding product to cart: ${err}`);
         }
+      });
+  };
+
+  const handleAddToWishlist = () => {
+    if (!user) {
+      message.warning("Please log in or sign up to add to wishlist");
+      navigate("/login");
+      return;
+    }
+
+    dispatch(addToWishlist(productForEdit._id))
+      .unwrap()
+      .then(() => {
+        message.success(`${productForEdit.title} added to wishlist`);
+      })
+      .catch((err) => {
+        message.error(`Failed to add to wishlist: ${err}`);
       });
   };
 
@@ -357,7 +374,7 @@ const ProductView = () => {
                   type="default"
                   size="large"
                   icon={<HeartOutlined />}
-                  onClick={() => message.info("Wishlist feature coming soon!")}
+                  onClick={handleAddToWishlist}
                 >
                   Wishlist
                 </Button>
